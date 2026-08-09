@@ -1,0 +1,78 @@
+.container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.icon {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.85rem;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.success {
+  background: rgba(5, 246, 152, 0.12);
+  border-color: rgba(5, 246, 152, 0.25);
+  color: #05f698;
+}
+
+.success .icon {
+  background: rgba(5, 246, 152, 0.2);
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+.error .icon {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.info {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.info .icon {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(40px); }
+}

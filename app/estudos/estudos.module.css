@@ -1,0 +1,314 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.listSection {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.areasContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.areaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.areaTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.areaTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.areaCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.studyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.studyCard {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.studyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.studyTitle {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  border-color: var(--border-color-hover);
+}
+
+.deleteIconBtn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--accent-danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressBar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Sessions */
+.sessionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+}
+
+.sessionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sessionsTitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.02em;
+}
+
+.sessionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 2px solid rgba(5, 246, 152, 0.4);
+}
+
+.sessionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sessionDate {
+  font-size: 0.78rem;
+  color: var(--accent-success);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.sessionDesc {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.collapsedText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  color: var(--accent-success);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.expandBtn:hover {
+  text-decoration: underline;
+}
+
+.sessionLink {
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+
+.sessionLink:hover {
+  text-decoration: underline;
+}
+
+.sessionForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(5, 246, 152, 0.2);
+}
+
+.sessionFormRow {
+  display: flex;
+  gap: 10px;
+}
+
+.addSessionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addSessionBtn:hover {
+  background: rgba(5, 246, 152, 0.06);
+  border-color: rgba(5, 246, 152, 0.25);
+  color: var(--accent-success);
+}
+
+/* Empty States */
+.emptyArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 20px 0;
+}
+
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-success);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

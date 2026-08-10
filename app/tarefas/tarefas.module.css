@@ -117,6 +117,7 @@
   padding: 10px 12px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid var(--accent-primary);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -126,15 +127,22 @@
 
 .taskCard:hover {
   border-color: rgba(255,255,255,0.12);
+  border-left-width: 3px;
   transform: translateY(-1px);
 }
 
-.taskCard.routine {
-  border-left: 3px solid var(--accent-primary);
+.taskFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.taskCard.extra {
-  border-left: 3px solid var(--accent-success);
+.taskTypeBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
 .taskTitle {
@@ -179,6 +187,60 @@
   text-align: center;
   padding: 16px 0;
   font-style: italic;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Day Picker */
+.dayPicker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dayPickerBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dayPickerBtn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+
+.dayPickerActive {
+  background: rgba(5, 246, 152, 0.12) !important;
+  border-color: rgba(5, 246, 152, 0.4) !important;
+  color: var(--accent-success) !important;
 }
 
 /* Empty + Loading States */

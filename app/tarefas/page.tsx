@@ -7,16 +7,18 @@ import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
 
 const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const daysShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export default function Tarefas() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [title, setTitle] = useState('');
   const [type, setType] = useState('recurring');
   const [dayOfWeek, setDayOfWeek] = useState<number | ''>('');
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
 
   const todayIndex = new Date().getDay();
@@ -31,15 +33,26 @@ export default function Tarefas() {
     setLoading(false);
   };
 
+  const toggleDay = (idx: number) => {
+    setSelectedDays(prev =>
+      prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx]
+    );
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    if (type === 'weekly' && selectedDays.length === 0) {
+      showToast('Selecione pelo menos um dia da semana.', 'error');
+      return;
+    }
     setSaving(true);
 
-    const taskData = {
+    const taskData: any = {
       title: title.trim(),
       type,
-      day_of_week: type === 'extra' && dayOfWeek !== '' ? Number(dayOfWeek) : null
+      day_of_week: type === 'extra' && dayOfWeek !== '' ? Number(dayOfWeek) : null,
+      days_of_week: type === 'weekly' ? selectedDays.sort() : null,
     };
 
     if (isEditing) {
@@ -61,6 +74,7 @@ export default function Tarefas() {
     setTitle(task.title);
     setType(task.type);
     setDayOfWeek(task.day_of_week !== null ? task.day_of_week : '');
+    setSelectedDays(task.days_of_week || []);
     setIsEditing(task.id);
     setIsModalOpen(true);
   };
@@ -85,8 +99,25 @@ export default function Tarefas() {
     setTitle('');
     setType('recurring');
     setDayOfWeek('');
+    setSelectedDays([]);
     setIsEditing(null);
     setIsModalOpen(false);
+  };
+
+  // Returns tasks that should appear on a given day index
+  const getTasksForDay = (dayIndex: number) => {
+    return tasks.filter(t => {
+      if (t.type === 'recurring') return true;
+      if (t.type === 'weekly') return Array.isArray(t.days_of_week) && t.days_of_week.includes(dayIndex);
+      if (t.type === 'extra') return t.day_of_week === dayIndex;
+      return false;
+    });
+  };
+
+  const getTaskTypeBadge = (task: any) => {
+    if (task.type === 'recurring') return { label: 'Diário', color: 'var(--accent-primary)' };
+    if (task.type === 'weekly') return { label: 'Semanal', color: 'var(--accent-success)' };
+    return { label: 'Avulso', color: 'var(--accent-purple)' };
   };
 
   return (
@@ -108,6 +139,13 @@ export default function Tarefas() {
         </div>
       </header>
 
+      {/* Legend */}
+      <div className={styles.legend}>
+        <span className={styles.legendItem}><span style={{ background: 'var(--accent-primary)' }} className={styles.legendDot}></span>Rotina Diária</span>
+        <span className={styles.legendItem}><span style={{ background: 'var(--accent-success)' }} className={styles.legendDot}></span>Fixo Semanal</span>
+        <span className={styles.legendItem}><span style={{ background: 'var(--accent-purple)' }} className={styles.legendDot}></span>Avulso</span>
+      </div>
+
       <div className={styles.content}>
         {loading ? (
           <div className={styles.loadingState}>
@@ -128,7 +166,7 @@ export default function Tarefas() {
           <div className={styles.weekBoard}>
             {daysOfWeek.map((dayName, index) => {
               const isToday = index === todayIndex;
-              const dayTasks = tasks.filter(t => t.type === 'recurring' || (t.type === 'extra' && t.day_of_week === index));
+              const dayTasks = getTasksForDay(index);
 
               return (
                 <div key={index} className={`${styles.dayColumn} ${isToday ? styles.today : ''}`}>
@@ -136,29 +174,41 @@ export default function Tarefas() {
                     {dayName}
                     {isToday && <span className={styles.todayBadge}>Hoje</span>}
                   </div>
-                  
+
                   <div className={styles.taskList}>
                     {dayTasks.length === 0 ? (
                       <div className={styles.emptyDay}>Livre</div>
                     ) : (
-                      dayTasks.map(task => (
-                        <div key={task.id} className={`${styles.taskCard} ${task.type === 'recurring' ? styles.routine : styles.extra}`}>
-                          <span className={styles.taskTitle}>{task.title}</span>
-                          <div className={styles.taskActions}>
-                            <button className={styles.iconBtn} onClick={() => handleEdit(task)} title="Editar">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                              </svg>
-                            </button>
-                            <button className={`${styles.iconBtn} ${styles.deleteIcon}`} onClick={() => handleDelete(task.id)} title="Deletar">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                              </svg>
-                            </button>
+                      dayTasks.map(task => {
+                        const badge = getTaskTypeBadge(task);
+                        return (
+                          <div
+                            key={task.id}
+                            className={styles.taskCard}
+                            style={{ borderLeftColor: badge.color }}
+                          >
+                            <span className={styles.taskTitle}>{task.title}</span>
+                            <div className={styles.taskFooter}>
+                              <span className={styles.taskTypeBadge} style={{ color: badge.color }}>
+                                {badge.label}
+                              </span>
+                              <div className={styles.taskActions}>
+                                <button className={styles.iconBtn} onClick={() => handleEdit(task)} title="Editar">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                  </svg>
+                                </button>
+                                <button className={`${styles.iconBtn} ${styles.deleteIcon}`} onClick={() => handleDelete(task.id)} title="Deletar">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -172,34 +222,59 @@ export default function Tarefas() {
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.formGroup}>
             <label>Título *</label>
-            <input 
-              type="text" 
-              value={title} 
-              onChange={e => setTitle(e.target.value)} 
+            <input
+              type="text"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
               placeholder="Ex: Devocional matinal"
               required
               autoFocus
             />
           </div>
-          
+
           <div className={styles.formGroup}>
-            <label>Tipo de Tarefa</label>
+            <label>Tipo de Compromisso</label>
             <select value={type} onChange={e => {
               setType(e.target.value);
-              if (e.target.value === 'recurring') setDayOfWeek('');
+              setDayOfWeek('');
+              setSelectedDays([]);
             }}>
-              <option value="recurring">🔄 Rotina Diária (aparece todo dia)</option>
-              <option value="extra">📅 Extra — dia específico</option>
+              <option value="recurring">🔄 Rotina Diária — aparece todo dia</option>
+              <option value="weekly">📆 Fixo Semanal — dias específicos toda semana</option>
+              <option value="extra">📅 Avulso — um único dia</option>
             </select>
           </div>
 
+          {type === 'weekly' && (
+            <div className={styles.formGroup}>
+              <label>Dias da semana *</label>
+              <div className={styles.dayPicker}>
+                {daysShort.map((day, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`${styles.dayPickerBtn} ${selectedDays.includes(idx) ? styles.dayPickerActive : ''}`}
+                    onClick={() => toggleDay(idx)}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+              {selectedDays.length > 0 && (
+                <p style={{ fontSize: '0.8rem', color: 'var(--accent-success)', marginTop: '4px' }}>
+                  ✓ {selectedDays.sort().map(d => daysOfWeek[d]).join(', ')}
+                </p>
+              )}
+            </div>
+          )}
+
           {type === 'extra' && (
             <div className={styles.formGroup}>
-              <label>Dia da Semana</label>
-              <select 
-                value={dayOfWeek} 
+              <label>Dia da Semana *</label>
+              <select
+                value={dayOfWeek}
                 onChange={e => setDayOfWeek(e.target.value !== '' ? Number(e.target.value) : '')}
-                required={type === 'extra'}
+                required
               >
                 <option value="">Selecione um dia...</option>
                 {daysOfWeek.map((day, idx) => (

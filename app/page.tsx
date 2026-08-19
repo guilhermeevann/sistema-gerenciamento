@@ -74,7 +74,11 @@ export default function Home() {
       
     if (tasksData) {
       const todayIndex = new Date().getDay();
-      const todaysTasks = tasksData.filter(t => t.type === 'recurring' || (t.type === 'extra' && t.day_of_week === todayIndex));
+      const todaysTasks = tasksData.filter(t => 
+        t.type === 'recurring' ||
+        (t.type === 'extra' && t.day_of_week === todayIndex) ||
+        (t.type === 'weekly' && Array.isArray(t.days_of_week) && t.days_of_week.includes(todayIndex))
+      );
       setRoutineTasks(todaysTasks);
     }
     

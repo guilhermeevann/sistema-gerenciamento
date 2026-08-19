@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -52,12 +53,28 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <aside className={`${styles.sidebar} glass-panel`}>
+    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} glass-panel`}>
+      {/* Toggle Button */}
+      <button
+        className={styles.toggleBtn}
+        onClick={() => setCollapsed(prev => !prev)}
+        title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+      >
+        <svg
+          width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
       <div className={styles.logo}>
         <div className={styles.logoIcon}></div>
-        <h2 className="h3">Rotina</h2>
+        {!collapsed && <h2 className="h3">Rotina</h2>}
       </div>
       
       <nav className={styles.nav}>
@@ -68,17 +85,20 @@ export default function Sidebar() {
               key={item.path} 
               href={item.path}
               className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+              title={collapsed ? item.name : ''}
             >
-              {item.icon}
-              {item.name}
+              <span className={styles.navIcon}>{item.icon}</span>
+              {!collapsed && <span className={styles.navLabel}>{item.name}</span>}
             </Link>
           );
         })}
       </nav>
       
-      <div className={styles.footer}>
-        <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Deus no controle.</p>
-      </div>
+      {!collapsed && (
+        <div className={styles.footer}>
+          <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Deus no controle.</p>
+        </div>
+      )}
     </aside>
   );
 }

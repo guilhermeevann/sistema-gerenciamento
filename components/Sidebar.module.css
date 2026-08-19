@@ -7,6 +7,39 @@
   flex-direction: column;
   position: sticky;
   top: 20px;
+  flex-shrink: 0;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+  padding: 32px 12px;
+}
+
+/* Toggle Button */
+.toggleBtn {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.toggleBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-primary);
+  border-color: var(--border-color-hover);
 }
 
 .logo {
@@ -14,6 +47,8 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 48px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .logoIcon {
@@ -22,6 +57,7 @@
   border-radius: 10px;
   background: linear-gradient(135deg, var(--accent-success), var(--accent-primary));
   box-shadow: 0 4px 12px rgba(5, 246, 152, 0.3);
+  flex-shrink: 0;
 }
 
 .nav {
@@ -41,6 +77,14 @@
   font-weight: 500;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* When collapsed, center the icon */
+.sidebar.collapsed .navItem {
+  padding: 12px;
+  justify-content: center;
 }
 
 .navItem:hover {
@@ -54,9 +98,29 @@
   border-color: rgba(5, 246, 152, 0.2);
 }
 
+.navIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navLabel {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .navLabel {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
 .footer {
   margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid var(--border-color);
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
 }

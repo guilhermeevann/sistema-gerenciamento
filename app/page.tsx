@@ -70,7 +70,9 @@ export default function Home() {
     // Fetch All Tasks to filter for today
     const { data: tasksData } = await supabase
       .from('tasks')
-      .select('*');
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
       
     if (tasksData) {
       const todayIndex = new Date().getDay();

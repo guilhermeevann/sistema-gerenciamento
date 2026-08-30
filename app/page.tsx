@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import styles from './page.module.css';
 import Modal from '@/components/Modal';
+import { showToast } from '@/components/Toast';
 
 export default function Home() {
   const [goals, setGoals] = useState<any[]>([]);
@@ -32,16 +33,39 @@ export default function Home() {
     setIsWordModalOpen(true);
   };
 
+  const [savingWord, setSavingWord] = useState(false);
+
   const handleSaveWord = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editWord) return;
+    if (!editWord.trim()) return;
+    setSavingWord(true);
+
+    let error = null;
 
     if (weeklyWord?.id) {
-      await supabase.from('weekly_words').update({ word: editWord, description: editWordDesc }).eq('id', weeklyWord.id);
+      // Update existing record
+      const result = await supabase
+        .from('weekly_words')
+        .update({ word: editWord.trim(), description: editWordDesc.trim() })
+        .eq('id', weeklyWord.id);
+      error = result.error;
     } else {
-      await supabase.from('weekly_words').insert([{ word: editWord, description: editWordDesc, week_start: getTodayString() }]);
+      // Insert new record
+      const result = await supabase
+        .from('weekly_words')
+        .insert([{ word: editWord.trim(), description: editWordDesc.trim(), week_start: getTodayString() }]);
+      error = result.error;
     }
-    
+
+    setSavingWord(false);
+
+    if (error) {
+      console.error('Erro ao salvar palavra:', error);
+      showToast(`Erro: ${error.message}`, 'error');
+      return; // Keep modal open so user can see the error
+    }
+
+    showToast('Palavra da semana atualizada!');
     setIsWordModalOpen(false);
     fetchDashboardData();
   };
@@ -251,8 +275,8 @@ export default function Home() {
               placeholder="Ex: Filipenses 4:13"
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>
-            Atualizar Palavra
+          <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }} disabled={savingWord}>
+            {savingWord ? 'Salvando...' : 'Atualizar Palavra'}
           </button>
         </form>
       </Modal>

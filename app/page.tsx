@@ -8,32 +8,34 @@ import { showToast } from '@/components/Toast';
 
 export default function Home() {
   const [goals, setGoals] = useState<any[]>([]);
-  const [weeklyWord, setWeeklyWord] = useState<any>(null);
+  const [weeklyWords, setWeeklyWords] = useState<any[]>([]);
   const [routineTasks, setRoutineTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Word Modal State
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
+  const [editingWordId, setEditingWordId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState('');
   const [editWordDesc, setEditWordDesc] = useState('');
+  const [savingWord, setSavingWord] = useState(false);
 
-  // Helper to get today's date string YYYY-MM-DD
-  const getTodayString = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
+  const getTodayString = () => new Date().toISOString().split('T')[0];
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
-  const openWordModal = () => {
-    setEditWord(weeklyWord?.word || '');
-    setEditWordDesc(weeklyWord?.description || '');
+  const openNewWordModal = () => {
+    setEditingWordId(null);
+    setEditWord('');
+    setEditWordDesc('');
     setIsWordModalOpen(true);
   };
 
-  const [savingWord, setSavingWord] = useState(false);
+  const openEditWordModal = (word: any) => {
+    setEditingWordId(word.id);
+    setEditWord(word.word || '');
+    setEditWordDesc(word.description || '');
+    setIsWordModalOpen(true);
+  };
 
   const handleSaveWord = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,15 +44,13 @@ export default function Home() {
 
     let error = null;
 
-    if (weeklyWord?.id) {
-      // Update existing record
+    if (editingWordId) {
       const result = await supabase
         .from('weekly_words')
         .update({ word: editWord.trim(), description: editWordDesc.trim() })
-        .eq('id', weeklyWord.id);
+        .eq('id', editingWordId);
       error = result.error;
     } else {
-      // Insert new record
       const result = await supabase
         .from('weekly_words')
         .insert([{ word: editWord.trim(), description: editWordDesc.trim(), week_start: getTodayString() }]);
@@ -60,67 +60,64 @@ export default function Home() {
     setSavingWord(false);
 
     if (error) {
-      console.error('Erro ao salvar palavra:', error);
       showToast(`Erro: ${error.message}`, 'error');
-      return; // Keep modal open so user can see the error
+      return;
     }
 
-    showToast('Palavra da semana atualizada!');
+    showToast(editingWordId ? 'Palavra atualizada!' : 'Nova palavra adicionada!');
     setIsWordModalOpen(false);
     fetchDashboardData();
   };
 
+  const handleDeleteWord = async (id: string) => {
+    if (!confirm('Deletar esta palavra da semana?')) return;
+    const { error } = await supabase.from('weekly_words').delete().eq('id', id);
+    if (error) showToast(`Erro: ${error.message}`, 'error');
+    else { showToast('Palavra removida.', 'info'); fetchDashboardData(); }
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
-    
-    // Fetch Goals
+
     const { data: goalsData } = await supabase
       .from('goals')
       .select('*')
       .order('focus_level', { ascending: false })
       .limit(3);
-      
     if (goalsData) setGoals(goalsData);
 
-    // Fetch Weekly Word (most recent)
     const { data: wordData } = await supabase
       .from('weekly_words')
       .select('*')
-      .order('week_start', { ascending: false })
-      .limit(1);
-      
-    if (wordData && wordData.length > 0) setWeeklyWord(wordData[0]);
+      .order('week_start', { ascending: false });
+    if (wordData) setWeeklyWords(wordData);
 
-    // Fetch All Tasks to filter for today
     const { data: tasksData } = await supabase
       .from('tasks')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
-      
+
     if (tasksData) {
       const todayIndex = new Date().getDay();
-      const todaysTasks = tasksData.filter(t => 
+      const todaysTasks = tasksData.filter(t =>
         t.type === 'recurring' ||
         (t.type === 'extra' && t.day_of_week === todayIndex) ||
         (t.type === 'weekly' && Array.isArray(t.days_of_week) && t.days_of_week.includes(todayIndex))
       );
       setRoutineTasks(todaysTasks);
     }
-    
+
     setLoading(false);
   };
 
   const toggleTaskCompletion = async (task: any) => {
     const todayStr = getTodayString();
-    // If it was completed today, we uncomplete it. Otherwise, we complete it today.
     const isCompletedToday = task.date === todayStr && task.is_completed;
-    
     const newStatus = !isCompletedToday;
     const newDate = newStatus ? todayStr : null;
 
-    // Update UI Optimistically
-    setRoutineTasks(prev => prev.map(t => 
+    setRoutineTasks(prev => prev.map(t =>
       t.id === task.id ? { ...t, is_completed: newStatus, date: newDate } : t
     ));
 
@@ -151,19 +148,56 @@ export default function Home() {
         <p className="text-secondary">O que vamos construir hoje?</p>
       </header>
 
-      {/* Palavra da Semana */}
-      <section className={`${styles.weeklyWord} glass-panel`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span className={styles.wordTitle}>Palavra da Semana</span>
-          <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '0.8rem' }} onClick={openWordModal}>
-            Editar
+      {/* Palavras da Semana */}
+      <section className={styles.wordsSection}>
+        <div className={styles.wordsSectionHeader}>
+          <div>
+            <span className={styles.wordTitle}>Palavras da Semana</span>
+            <span className={styles.wordsCount}>{weeklyWords.length} palavra{weeklyWords.length !== 1 ? 's' : ''}</span>
+          </div>
+          <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '6px 14px' }} onClick={openNewWordModal}>
+            + Nova Palavra
           </button>
         </div>
-        <p className={styles.wordContent}>
-          "{weeklyWord?.word || 'Aguardando palavra da semana...'}"
-        </p>
-        {weeklyWord?.description && (
-          <p className="text-secondary">{weeklyWord.description}</p>
+
+        {weeklyWords.length === 0 ? (
+          <div className={`${styles.weeklyWord} glass-panel`}>
+            <p className="text-muted" style={{ fontSize: '0.9rem' }}>Nenhuma palavra adicionada ainda.</p>
+          </div>
+        ) : (
+          <div className={styles.wordsGrid}>
+            {weeklyWords.map(word => (
+              <div key={word.id} className={`${styles.weeklyWord} glass-panel`}>
+                <p className={styles.wordContent}>"{word.word}"</p>
+                {word.description && (
+                  <p className="text-secondary" style={{ fontSize: '0.9rem' }}>{word.description}</p>
+                )}
+                <div className={styles.wordActions}>
+                  <button
+                    className={styles.wordActionBtn}
+                    onClick={() => openEditWordModal(word)}
+                    title="Editar"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar
+                  </button>
+                  <button
+                    className={`${styles.wordActionBtn} ${styles.wordDeleteBtn}`}
+                    onClick={() => handleDeleteWord(word.id)}
+                    title="Deletar"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                    </svg>
+                    Deletar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
@@ -183,21 +217,21 @@ export default function Home() {
                 routineTasks.map(task => {
                   const isCompletedToday = task.is_completed && task.date === todayStr;
                   return (
-                    <div 
-                      key={task.id} 
+                    <div
+                      key={task.id}
                       className={`${styles.checkItem} ${isCompletedToday ? styles.completed : ''}`}
                       onClick={() => toggleTaskCompletion(task)}
                     >
                       <div className={styles.checkbox}>
                         {isCompletedToday && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                             <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         )}
                       </div>
                       <span className={styles.checkText}>{task.title}</span>
                     </div>
-                  )
+                  );
                 })
               )}
             </div>
@@ -219,7 +253,7 @@ export default function Home() {
           <div className={styles.sectionHeader}>
             <h2 className="h3">Foco Principal</h2>
           </div>
-          
+
           <div className={styles.goalsList}>
             {goals.length === 0 ? (
               <p className="text-muted">Nenhuma meta definida. Adicione metas na aba Metas.</p>
@@ -228,8 +262,8 @@ export default function Home() {
                 <div key={goal.id} className={`${styles.goalCard} glass-panel ${goal.completed ? styles.goalCompleted : ''}`}>
                   <div className={styles.goalHeader}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div 
-                        className={`${styles.checkbox} ${goal.completed ? styles.checkboxActive : ''}`} 
+                      <div
+                        className={`${styles.checkbox} ${goal.completed ? styles.checkboxActive : ''}`}
                         onClick={async () => {
                           const newStatus = !goal.completed;
                           setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
@@ -237,7 +271,7 @@ export default function Home() {
                         }}
                       >
                         {goal.completed && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                             <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         )}
@@ -254,29 +288,35 @@ export default function Home() {
         </section>
       </div>
 
-      <Modal isOpen={isWordModalOpen} onClose={() => setIsWordModalOpen(false)} title="Palavra da Semana">
+      {/* Modal de Palavra */}
+      <Modal
+        isOpen={isWordModalOpen}
+        onClose={() => setIsWordModalOpen(false)}
+        title={editingWordId ? 'Editar Palavra' : 'Nova Palavra da Semana'}
+      >
         <form onSubmit={handleSaveWord} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Palavra / Frase</label>
-            <input 
-              type="text" 
-              value={editWord} 
-              onChange={e => setEditWord(e.target.value)} 
+            <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Palavra / Frase *</label>
+            <textarea
+              value={editWord}
+              onChange={e => setEditWord(e.target.value)}
               placeholder="Ex: Tudo posso naquele que me fortalece."
               required
+              rows={3}
+              autoFocus
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Referência / Descrição</label>
-            <input 
-              type="text" 
-              value={editWordDesc} 
-              onChange={e => setEditWordDesc(e.target.value)} 
+            <input
+              type="text"
+              value={editWordDesc}
+              onChange={e => setEditWordDesc(e.target.value)}
               placeholder="Ex: Filipenses 4:13"
             />
           </div>
           <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }} disabled={savingWord}>
-            {savingWord ? 'Salvando...' : 'Atualizar Palavra'}
+            {savingWord ? 'Salvando...' : editingWordId ? 'Atualizar Palavra' : 'Adicionar Palavra'}
           </button>
         </form>
       </Modal>

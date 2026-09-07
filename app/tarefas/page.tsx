@@ -133,6 +133,19 @@ export default function Tarefas() {
     fetchTasks();
   };
 
+  const handleResetWeek = async () => {
+    const extras = tasks.filter(t => t.type === 'extra');
+    if (extras.length === 0) {
+      showToast('Nenhuma tarefa avulsa para remover.', 'info');
+      return;
+    }
+    if (!confirm(`Remover ${extras.length} tarefa(s) avulsa(s) da semana? Rotinas diárias e semanais fixas serão mantidas.`)) return;
+    const { error } = await supabase.from('tasks').delete().eq('type', 'extra');
+    if (error) showToast('Erro ao zerar semana.', 'error');
+    else showToast(`${extras.length} tarefa(s) avulsa(s) removida(s).`, 'info');
+    fetchTasks();
+  };
+
   const resetForm = () => {
     setTitle('');
     setType('recurring');
@@ -165,6 +178,12 @@ export default function Tarefas() {
           <p className="text-secondary">O dia de hoje está destacado. Use ↑ ↓ para reordenar.</p>
         </div>
         <div className={styles.headerActions}>
+          {tasks.some(t => t.type === 'extra') && (
+            <button className="btn btn-secondary" onClick={handleResetWeek} style={{ fontSize: '0.85rem' }}
+              title="Remove apenas tarefas avulsas, mantendo rotinas e semanais fixas">
+              🗑 Zerar Semana
+            </button>
+          )}
           {tasks.length > 0 && (
             <button className="btn btn-danger" onClick={handleClearAll} style={{ fontSize: '0.85rem' }}>
               Limpar Tudo

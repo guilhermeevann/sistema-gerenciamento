@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { todayLocal } from '@/lib/date';
 import styles from '../instagram.module.css';
 import {
   IdeaStatus, IgIdea, IgInspiration, IgModel, formats, numOrNull, orNull, performanceOptions,
@@ -47,7 +48,7 @@ const toForm = (idea: IgIdea | null, status: IdeaStatus) => ({
   pillar: idea?.pillar ?? '',
   model_id: idea?.model_id ?? '',
   inspiration_id: idea?.inspiration_id ?? '',
-  published_at: idea?.published_at ?? (status === 'publicado' ? new Date().toISOString().split('T')[0] : ''),
+  published_at: idea?.published_at ?? (status === 'publicado' ? todayLocal() : ''),
   post_url: idea?.post_url ?? '',
   performance: idea?.performance ?? '',
   learnings: idea?.learnings ?? '',
@@ -120,7 +121,7 @@ export default function IdeaModal({ isOpen, idea, status, models, inspirations, 
         </div>
         <div className={styles.formGroup}>
           <label>Roteiro / desenvolvimento</label>
-          <textarea rows={4} value={form.description} onChange={e => set('description', e.target.value)} />
+          <textarea rows={8} value={form.description} onChange={e => set('description', e.target.value)} />
         </div>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>

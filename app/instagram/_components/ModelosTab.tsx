@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
 import { IgIdea, IgModel, formats, formatLabel, orNull, performed } from '../types';
 import { EditIcon, LinkIcon, TrashIcon } from './icons';
@@ -60,7 +61,7 @@ export default function ModelosTab({ models, ideas, onChange }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deletar este modelo? As ideias ligadas a ele continuam, só perdem o vínculo.')) return;
+    if (!(await confirmAction({ title: 'Deletar modelo?', message: 'As ideias ligadas a ele continuam, só perdem o vínculo.', confirmLabel: 'Deletar', danger: true }))) return;
     const { error } = await supabase.from('ig_models').delete().eq('id', id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Modelo removido.', 'info');

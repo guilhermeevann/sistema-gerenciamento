@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import styles from './metas.module.css';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 
 export default function Metas() {
   const [goals, setGoals] = useState<any[]>([]);
@@ -17,12 +18,7 @@ export default function Metas() {
   const [focusLevel, setFocusLevel] = useState(3);
   const [isEditing, setIsEditing] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchGoals();
-  }, []);
-
   const fetchGoals = async () => {
-    setLoading(true);
     const { data, error } = await supabase
       .from('goals')
       .select('*')
@@ -33,24 +29,25 @@ export default function Metas() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     setSaving(true);
 
-    const payload = { title: title.trim(), description: description.trim(), focus_level: focusLevel };
+    const payload = { title: title.trim(), description: description.trim() || null, focus_level: focusLevel };
 
-    if (isEditing) {
-      const { error } = await supabase.from('goals').update(payload).eq('id', isEditing);
-      if (error) showToast('Erro ao atualizar meta.', 'error');
-      else showToast('Meta atualizada!');
-    } else {
-      const { error } = await supabase.from('goals').insert([payload]);
-      if (error) showToast('Erro ao criar meta.', 'error');
-      else showToast('Meta criada com sucesso!');
-    }
+    const { error } = isEditing
+      ? await supabase.from('goals').update(payload).eq('id', isEditing)
+      : await supabase.from('goals').insert([payload]);
 
     setSaving(false);
+    // Em caso de erro o modal fica aberto, para não perder o que foi digitado.
+    if (error) { showToast(isEditing ? 'Erro ao atualizar meta.' : 'Erro ao criar meta.', 'error'); return; }
+    showToast(isEditing ? 'Meta atualizada!' : 'Meta criada com sucesso!');
     resetForm();
     fetchGoals();
   };
@@ -58,9 +55,13 @@ export default function Metas() {
   const handleToggleComplete = async (goal: any) => {
     const newStatus = !goal.completed;
     setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
-    await supabase.from('goals').update({ completed: newStatus }).eq('id', goal.id);
+    const { error } = await supabase.from('goals').update({ completed: newStatus }).eq('id', goal.id);
+    if (error) {
+      setGoals(prev => prev.map(g => g.id === goal.id ? goal : g));
+      showToast('Não foi possível salvar. Tente de novo.', 'error');
+      return;
+    }
     showToast(newStatus ? 'Meta concluída! 🎉' : 'Meta reaberta.', newStatus ? 'success' : 'info');
-    fetchGoals(); // re-sort
   };
 
   const handleEdit = (goal: any) => {
@@ -71,16 +72,24 @@ export default function Metas() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar esta meta?')) return;
-    const { error } = await supabase.from('goals').delete().eq('id', id);
+  const handleDelete = async (goal: any) => {
+    const ok = await confirmAction({ title: 'Deletar meta?', message: `"${goal.title}" será removida.`, confirmLabel: 'Deletar', danger: true });
+    if (!ok) return;
+    const { error } = await supabase.from('goals').delete().eq('id', goal.id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Meta deletada.', 'info');
     fetchGoals();
   };
 
   const handleClearAll = async () => {
-    if (!confirm('Deletar TODAS as metas? Esta ação não pode ser desfeita.')) return;
+    const ok = await confirmAction({
+      title: 'Deletar todas as metas?',
+      message: `As ${goals.length} metas, em andamento e concluídas, serão apagadas. Não dá para desfazer.`,
+      confirmLabel: 'Apagar tudo',
+      danger: true,
+      requireText: 'APAGAR',
+    });
+    if (!ok) return;
     const { error } = await supabase.from('goals').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     if (error) showToast('Erro ao limpar.', 'error');
     else showToast('Todas as metas foram removidas.', 'info');
@@ -98,14 +107,17 @@ export default function Metas() {
   const active = goals.filter(g => !g.completed);
   const completed = goals.filter(g => g.completed);
 
-  const GoalCard = ({ goal }: { goal: any }) => (
-    <div className={`${styles.goalCard} glass-panel ${goal.completed ? styles.goalCompleted : ''}`}>
+  // Função de render (não componente): definir componente dentro do render o recriava a cada atualização.
+  const renderGoalCard = (goal: any) => (
+    <div key={goal.id} className={`${styles.goalCard} glass-panel ${goal.completed ? styles.goalCompleted : ''}`}>
       <div className={styles.goalCardHeader}>
         <div className={styles.goalTitleRow}>
           <button
             className={`${styles.checkbox} ${goal.completed ? styles.checkboxActive : ''}`}
             onClick={() => handleToggleComplete(goal)}
             title={goal.completed ? 'Reabrir meta' : 'Marcar como concluída'}
+            role="checkbox"
+            aria-checked={!!goal.completed}
           >
             {goal.completed && (
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -132,7 +144,7 @@ export default function Metas() {
           </svg>
           Editar
         </button>
-        <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(goal.id)}>
+        <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(goal)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
           </svg>
@@ -155,7 +167,7 @@ export default function Metas() {
               Limpar Tudo
             </button>
           )}
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}>
             + Nova Meta
           </button>
         </div>
@@ -183,7 +195,7 @@ export default function Metas() {
               <section className={styles.listSection}>
                 <h2 className={styles.sectionLabel}>Em Andamento ({active.length})</h2>
                 <div className={styles.goalsGrid}>
-                  {active.map(goal => <GoalCard key={goal.id} goal={goal} />)}
+                  {active.map(renderGoalCard)}
                 </div>
               </section>
             )}
@@ -193,7 +205,7 @@ export default function Metas() {
                   Concluídas ({completed.length})
                 </h2>
                 <div className={styles.goalsGrid}>
-                  {completed.map(goal => <GoalCard key={goal.id} goal={goal} />)}
+                  {completed.map(renderGoalCard)}
                 </div>
               </section>
             )}

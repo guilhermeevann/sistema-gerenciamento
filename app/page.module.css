@@ -30,7 +30,7 @@
 
 .wordsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -210,11 +210,24 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  margin: -4px -10px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: background 0.15s ease;
+}
+
+.checkItem:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .checkbox {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
   border-radius: 6px;
   border: 2px solid var(--border-color);
   display: flex;
@@ -249,4 +262,49 @@
   height: 100%;
   background: linear-gradient(90deg, var(--accent-success), var(--accent-primary));
   transition: width 0.3s ease;
+}
+
+.dateLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-success);
+  margin-bottom: 6px;
+}
+
+.sectionLink {
+  font-size: 0.85rem;
+  color: #60a5fa;
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  text-decoration: underline;
+}
+
+.checkText {
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .goalsList {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .wordsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .wordContent {
+    font-size: 1.1rem;
+  }
 }

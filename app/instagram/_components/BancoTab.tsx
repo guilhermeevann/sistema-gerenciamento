@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
-import { IdeaStatus, IgIdea, IgModel, formatLabel } from '../types';
+import { IdeaStatus, IgIdea, IgModel, formatLabel, matchesSearch } from '../types';
 import { ArrowIcon, BackIcon, EditIcon, TrashIcon } from './icons';
 
 interface Props {
@@ -20,6 +22,8 @@ const columns: { status: IdeaStatus; title: string; hint: string }[] = [
 ];
 
 export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Props) {
+  const [query, setQuery] = useState('');
+
   const move = async (id: string, status: IdeaStatus) => {
     const { error } = await supabase.from('ig_ideas').update({ status }).eq('id', id);
     if (error) showToast('Erro ao mover ideia.', 'error');
@@ -27,7 +31,7 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deletar esta ideia?')) return;
+    if (!(await confirmAction({ title: 'Deletar ideia?', message: 'A ideia e o roteiro dela serão apagados.', confirmLabel: 'Deletar', danger: true }))) return;
     const { error } = await supabase.from('ig_ideas').delete().eq('id', id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Ideia removida.', 'info');
@@ -44,16 +48,18 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
         <button className="btn btn-primary" onClick={onNew}>+ Nova ideia</button>
       </div>
 
+      <input className={styles.search} type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar por título, gancho, roteiro ou pilar..." />
+
       <div className={styles.board}>
         {columns.map(col => {
-          const items = ideas.filter(i => i.status === col.status);
+          const items = ideas.filter(i => i.status === col.status && matchesSearch(i, query));
           return (
             <div key={col.status} className={styles.column}>
               <div className={styles.columnTitle}>
                 <span>{col.title}</span>
                 <span className={styles.tabCount}>{items.length}</span>
               </div>
-              {items.length === 0 && <div className={styles.empty}>{col.hint}</div>}
+              {items.length === 0 && <div className={styles.empty}>{query ? 'Nada com essa busca.' : col.hint}</div>}
               {items.map(idea => {
                 const model = models.find(m => m.id === idea.model_id);
                 return (

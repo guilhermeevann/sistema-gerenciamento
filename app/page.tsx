@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { todayLocal } from '@/lib/date';
 import styles from './page.module.css';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
+
+const CheckMark = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <path d="M10 3L4.5 8.5L2 6" stroke="#0b0f19" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 export default function Home() {
   const [goals, setGoals] = useState<any[]>([]);
@@ -19,7 +28,43 @@ export default function Home() {
   const [editWordDesc, setEditWordDesc] = useState('');
   const [savingWord, setSavingWord] = useState(false);
 
-  const getTodayString = () => new Date().toISOString().split('T')[0];
+  const fetchWords = async () => {
+    const { data, error } = await supabase
+      .from('weekly_words')
+      .select('*')
+      .order('week_start', { ascending: false });
+    if (error) showToast('Erro ao carregar palavras.', 'error');
+    else setWeeklyWords(data ?? []);
+  };
+
+  const fetchDashboardData = async () => {
+    const [goalsRes, tasksRes] = await Promise.all([
+      supabase
+        .from('goals')
+        .select('*')
+        .or('completed.is.null,completed.eq.false')
+        .order('focus_level', { ascending: false })
+        .limit(3),
+      supabase
+        .from('tasks')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true }),
+      fetchWords(),
+    ]);
+
+    if (goalsRes.error || tasksRes.error) showToast('Erro ao carregar o painel.', 'error');
+    setGoals(goalsRes.data ?? []);
+
+    const todayIndex = new Date().getDay();
+    setRoutineTasks((tasksRes.data ?? []).filter(t =>
+      t.type === 'recurring' ||
+      (t.type === 'extra' && t.day_of_week === todayIndex) ||
+      (t.type === 'weekly' && Array.isArray(t.days_of_week) && t.days_of_week.includes(todayIndex))
+    ));
+
+    setLoading(false);
+  };
 
   useEffect(() => { fetchDashboardData(); }, []);
 
@@ -42,20 +87,10 @@ export default function Home() {
     if (!editWord.trim()) return;
     setSavingWord(true);
 
-    let error = null;
-
-    if (editingWordId) {
-      const result = await supabase
-        .from('weekly_words')
-        .update({ word: editWord.trim(), description: editWordDesc.trim() })
-        .eq('id', editingWordId);
-      error = result.error;
-    } else {
-      const result = await supabase
-        .from('weekly_words')
-        .insert([{ word: editWord.trim(), description: editWordDesc.trim(), week_start: getTodayString() }]);
-      error = result.error;
-    }
+    const payload = { word: editWord.trim(), description: editWordDesc.trim() || null };
+    const { error } = editingWordId
+      ? await supabase.from('weekly_words').update(payload).eq('id', editingWordId)
+      : await supabase.from('weekly_words').insert([{ ...payload, week_start: todayLocal() }]);
 
     setSavingWord(false);
 
@@ -66,53 +101,24 @@ export default function Home() {
 
     showToast(editingWordId ? 'Palavra atualizada!' : 'Nova palavra adicionada!');
     setIsWordModalOpen(false);
-    fetchDashboardData();
+    fetchWords();
   };
 
-  const handleDeleteWord = async (id: string) => {
-    if (!confirm('Deletar esta palavra da semana?')) return;
-    const { error } = await supabase.from('weekly_words').delete().eq('id', id);
+  const handleDeleteWord = async (word: any) => {
+    const ok = await confirmAction({
+      title: 'Deletar palavra?',
+      message: `"${word.word}" será removida.`,
+      confirmLabel: 'Deletar',
+      danger: true,
+    });
+    if (!ok) return;
+    const { error } = await supabase.from('weekly_words').delete().eq('id', word.id);
     if (error) showToast(`Erro: ${error.message}`, 'error');
-    else { showToast('Palavra removida.', 'info'); fetchDashboardData(); }
-  };
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-
-    const { data: goalsData } = await supabase
-      .from('goals')
-      .select('*')
-      .order('focus_level', { ascending: false })
-      .limit(3);
-    if (goalsData) setGoals(goalsData);
-
-    const { data: wordData } = await supabase
-      .from('weekly_words')
-      .select('*')
-      .order('week_start', { ascending: false });
-    if (wordData) setWeeklyWords(wordData);
-
-    const { data: tasksData } = await supabase
-      .from('tasks')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: true });
-
-    if (tasksData) {
-      const todayIndex = new Date().getDay();
-      const todaysTasks = tasksData.filter(t =>
-        t.type === 'recurring' ||
-        (t.type === 'extra' && t.day_of_week === todayIndex) ||
-        (t.type === 'weekly' && Array.isArray(t.days_of_week) && t.days_of_week.includes(todayIndex))
-      );
-      setRoutineTasks(todaysTasks);
-    }
-
-    setLoading(false);
+    else { showToast('Palavra removida.', 'info'); fetchWords(); }
   };
 
   const toggleTaskCompletion = async (task: any) => {
-    const todayStr = getTodayString();
+    const todayStr = todayLocal();
     const isCompletedToday = task.date === todayStr && task.is_completed;
     const newStatus = !isCompletedToday;
     const newDate = newStatus ? todayStr : null;
@@ -121,29 +127,42 @@ export default function Home() {
       t.id === task.id ? { ...t, is_completed: newStatus, date: newDate } : t
     ));
 
-    await supabase
+    const { error } = await supabase
       .from('tasks')
       .update({ is_completed: newStatus, date: newDate })
       .eq('id', task.id);
+
+    if (error) {
+      setRoutineTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      showToast('Não foi possível salvar. Tente de novo.', 'error');
+    }
   };
 
-  const calculateProgress = () => {
-    if (routineTasks.length === 0) return 0;
-    const todayStr = getTodayString();
-    const completedCount = routineTasks.filter(t => t.is_completed && t.date === todayStr).length;
-    return Math.round((completedCount / routineTasks.length) * 100);
+  const toggleGoal = async (goal: any) => {
+    const newStatus = !goal.completed;
+    setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
+    const { error } = await supabase.from('goals').update({ completed: newStatus }).eq('id', goal.id);
+    if (error) {
+      setGoals(prev => prev.map(g => g.id === goal.id ? goal : g));
+      showToast('Não foi possível salvar. Tente de novo.', 'error');
+    } else if (newStatus) {
+      showToast('Meta concluída! 🎉');
+    }
   };
 
   if (loading) {
-    return <div className="text-secondary">Carregando painel...</div>;
+    return <div className="page-loading">Carregando painel...</div>;
   }
 
-  const progress = calculateProgress();
-  const todayStr = getTodayString();
+  const todayStr = todayLocal();
+  const doneCount = routineTasks.filter(t => t.is_completed && t.date === todayStr).length;
+  const progress = routineTasks.length ? Math.round((doneCount / routineTasks.length) * 100) : 0;
+  const todayLabel = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
+        <p className={styles.dateLabel}>{todayLabel}</p>
         <h1 className="h2">Olá, Guilherme.</h1>
         <p className="text-secondary">O que vamos construir hoje?</p>
       </header>
@@ -168,27 +187,19 @@ export default function Home() {
           <div className={styles.wordsGrid}>
             {weeklyWords.map(word => (
               <div key={word.id} className={`${styles.weeklyWord} glass-panel`}>
-                <p className={styles.wordContent}>"{word.word}"</p>
+                <p className={styles.wordContent}>&ldquo;{word.word}&rdquo;</p>
                 {word.description && (
                   <p className="text-secondary" style={{ fontSize: '0.9rem' }}>{word.description}</p>
                 )}
                 <div className={styles.wordActions}>
-                  <button
-                    className={styles.wordActionBtn}
-                    onClick={() => openEditWordModal(word)}
-                    title="Editar"
-                  >
+                  <button className={styles.wordActionBtn} onClick={() => openEditWordModal(word)} title="Editar">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                     Editar
                   </button>
-                  <button
-                    className={`${styles.wordActionBtn} ${styles.wordDeleteBtn}`}
-                    onClick={() => handleDeleteWord(word.id)}
-                    title="Deletar"
-                  >
+                  <button className={`${styles.wordActionBtn} ${styles.wordDeleteBtn}`} onClick={() => handleDeleteWord(word)} title="Deletar">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
                     </svg>
@@ -205,46 +216,50 @@ export default function Home() {
         {/* Checklist Diário */}
         <section className={styles.routineSection}>
           <div className={`${styles.routineCard} glass-panel`}>
-            <h2 className="h3">Rotina Diária</h2>
-            <p className="text-secondary" style={{ fontSize: '0.9rem', marginTop: '-8px' }}>
-              O que fizemos hoje?
-            </p>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2 className="h3">Rotina de Hoje</h2>
+                <p className="text-secondary" style={{ fontSize: '0.9rem' }}>O que fizemos hoje?</p>
+              </div>
+              <Link href="/tarefas" className={styles.sectionLink}>Gerenciar →</Link>
+            </div>
 
             <div className={styles.checklist}>
               {routineTasks.length === 0 ? (
-                <p className="text-muted" style={{ fontSize: '0.9rem' }}>Nenhuma tarefa recorrente.</p>
+                <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+                  Nada programado para hoje. <Link href="/tarefas" className={styles.sectionLink}>Adicionar tarefa</Link>
+                </p>
               ) : (
                 routineTasks.map(task => {
                   const isCompletedToday = task.is_completed && task.date === todayStr;
                   return (
-                    <div
+                    <button
                       key={task.id}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isCompletedToday}
                       className={`${styles.checkItem} ${isCompletedToday ? styles.completed : ''}`}
                       onClick={() => toggleTaskCompletion(task)}
                     >
-                      <div className={styles.checkbox}>
-                        {isCompletedToday && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
+                      <span className={styles.checkbox}>{isCompletedToday && <CheckMark />}</span>
                       <span className={styles.checkText}>{task.title}</span>
-                    </div>
+                    </button>
                   );
                 })
               )}
             </div>
 
-            <div className={styles.progressContainer}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span>Progresso</span>
-                <span>{progress}%</span>
+            {routineTasks.length > 0 && (
+              <div className={styles.progressContainer}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span>{doneCount} de {routineTasks.length} feitas</span>
+                  <span>{progress}%{progress === 100 ? ' 🎉' : ''}</span>
+                </div>
+                <div className={styles.progressBar}>
+                  <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
+                </div>
               </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
@@ -252,35 +267,34 @@ export default function Home() {
         <section className={styles.goalsSection}>
           <div className={styles.sectionHeader}>
             <h2 className="h3">Foco Principal</h2>
+            <Link href="/metas" className={styles.sectionLink}>Ver metas →</Link>
           </div>
 
           <div className={styles.goalsList}>
             {goals.length === 0 ? (
-              <p className="text-muted">Nenhuma meta definida. Adicione metas na aba Metas.</p>
+              <p className="text-muted">
+                Nenhuma meta em andamento. <Link href="/metas" className={styles.sectionLink}>Criar meta</Link>
+              </p>
             ) : (
               goals.map(goal => (
                 <div key={goal.id} className={`${styles.goalCard} glass-panel ${goal.completed ? styles.goalCompleted : ''}`}>
                   <div className={styles.goalHeader}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                      <button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={!!goal.completed}
+                        aria-label={`Concluir meta ${goal.title}`}
                         className={`${styles.checkbox} ${goal.completed ? styles.checkboxActive : ''}`}
-                        onClick={async () => {
-                          const newStatus = !goal.completed;
-                          setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
-                          await supabase.from('goals').update({ completed: newStatus }).eq('id', goal.id);
-                        }}
+                        onClick={() => toggleGoal(goal)}
                       >
-                        {goal.completed && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
+                        {goal.completed && <CheckMark />}
+                      </button>
                       <h3 className={styles.goalTitle}>{goal.title}</h3>
                     </div>
                     <span className="badge badge-amber">Foco {goal.focus_level}</span>
                   </div>
-                  <p className={styles.goalDesc}>{goal.description}</p>
+                  {goal.description && <p className={styles.goalDesc}>{goal.description}</p>}
                 </div>
               ))
             )}

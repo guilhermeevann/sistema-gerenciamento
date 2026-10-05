@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 import Sidebar from "@/components/Sidebar";
 import ToastContainer from "@/components/Toast";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function RootLayout({
   children,
@@ -25,11 +26,12 @@ export default function RootLayout({
       <body>
         <div className="app-container">
           <Sidebar />
-          <main className="main-content" style={{ flex: 1, padding: '40px', overflowY: 'auto', height: '100vh' }}>
+          <main className="main-content">
             {children}
           </main>
         </div>
         <ToastContainer />
+        <ConfirmDialog />
       </body>
     </html>
   );

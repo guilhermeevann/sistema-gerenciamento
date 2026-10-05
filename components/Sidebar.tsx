@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -66,13 +66,24 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
+  // Lembra se o menu estava recolhido entre visitas.
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem('sidebar-collapsed') === '1'); } catch {}
+  }, []);
+
+  const toggle = () => setCollapsed(prev => {
+    try { localStorage.setItem('sidebar-collapsed', prev ? '0' : '1'); } catch {}
+    return !prev;
+  });
+
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} glass-panel`}>
       {/* Toggle Button */}
       <button
         className={styles.toggleBtn}
-        onClick={() => setCollapsed(prev => !prev)}
+        onClick={toggle}
         title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+        aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
       >
         <svg
           width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -90,16 +101,17 @@ export default function Sidebar() {
       
       <nav className={styles.nav}>
         {navItems.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = item.path === '/' ? pathname === '/' : pathname.startsWith(item.path);
           return (
             <Link 
               key={item.path} 
               href={item.path}
               className={`${styles.navItem} ${isActive ? styles.active : ''}`}
               title={collapsed ? item.name : ''}
+              aria-current={isActive ? 'page' : undefined}
             >
               <span className={styles.navIcon}>{item.icon}</span>
-              {!collapsed && <span className={styles.navLabel}>{item.name}</span>}
+              <span className={styles.navLabel}>{item.name}</span>
             </Link>
           );
         })}

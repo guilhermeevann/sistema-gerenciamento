@@ -75,3 +75,11 @@ export const formatDate = (date: string | null) =>
 // Campos de texto vazios viram null para não gravar string vazia no banco.
 export const orNull = (v: string) => (v.trim() ? v.trim() : null);
 export const numOrNull = (v: string) => (v.trim() === '' ? null : Number(v));
+
+// Busca sem acento e sem caixa em título, gancho, roteiro e pilar.
+const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+export const matchesSearch = (idea: IgIdea, query: string) => {
+  if (!query.trim()) return true;
+  const haystack = fold([idea.title, idea.hook, idea.description, idea.pillar].filter(Boolean).join(' '));
+  return fold(query).trim().split(/\s+/).every(term => haystack.includes(term));
+};

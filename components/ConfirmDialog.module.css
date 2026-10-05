@@ -1,0 +1,38 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.typeLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.typeLabel strong {
+  color: var(--accent-danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dangerSolid {
+  background: var(--accent-danger);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dangerSolid:hover:not(:disabled) {
+  background: #dc2626;
+}

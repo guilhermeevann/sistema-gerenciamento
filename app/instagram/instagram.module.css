@@ -128,7 +128,7 @@
 
 .overviewCols {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 20px;
 }
 
@@ -165,7 +165,7 @@
 /* Cards */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -303,7 +303,7 @@
 /* Kanban */
 .board {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 20px;
   align-items: start;
 }
@@ -485,4 +485,50 @@
 @media (max-width: 640px) {
   .header { flex-direction: column; }
   .formRow, .formRow3 { grid-template-columns: 1fr; }
+}
+
+.search {
+  max-width: 420px;
+}
+
+.brainText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.93rem;
+  word-break: break-word;
+}
+
+.brainText:hover {
+  color: #fff;
+}
+
+.brainMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.scriptTag {
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+}
+
+@media (max-width: 640px) {
+  .brainItem .rowMeta {
+    display: none;
+  }
+
+  .search {
+    max-width: none;
+  }
 }

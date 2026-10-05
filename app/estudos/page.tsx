@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import styles from './estudos.module.css';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
+import { todayLocal } from '@/lib/date';
 
 const areas = ['Espiritual', 'Profissional', 'Desenvolvimento Pessoal'];
 
@@ -22,17 +24,15 @@ export default function Estudos() {
   const [isEditing, setIsEditing] = useState<string | null>(null);
 
   const [activeStudyId, setActiveStudyId] = useState<string | null>(null);
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [sessionDate, setSessionDate] = useState(todayLocal());
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [sessionVideo, setSessionVideo] = useState('');
   const [sessionDesc, setSessionDesc] = useState('');
   const [savingSession, setSavingSession] = useState(false);
 
   const [expandedSessions, setExpandedSessions] = useState<string[]>([]);
 
-  useEffect(() => { fetchData(); }, []);
-
   const fetchData = async () => {
-    setLoading(true);
     const [{ data: studiesData, error: sErr }, { data: sessionsData, error: seErr }] = await Promise.all([
       supabase.from('studies').select('*').order('created_at', { ascending: false }),
       supabase.from('study_sessions').select('*').order('date', { ascending: false })
@@ -43,6 +43,8 @@ export default function Estudos() {
     setLoading(false);
   };
 
+  useEffect(() => { fetchData(); }, []);
+
   const handleSaveStudy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -50,17 +52,14 @@ export default function Estudos() {
 
     const studyData = { title: title.trim(), type, area, progress };
 
-    if (isEditing) {
-      const { error } = await supabase.from('studies').update(studyData).eq('id', isEditing);
-      if (error) showToast('Erro ao atualizar.', 'error');
-      else showToast('Estudo atualizado!');
-    } else {
-      const { error } = await supabase.from('studies').insert([studyData]);
-      if (error) showToast('Erro ao criar estudo.', 'error');
-      else showToast('Estudo adicionado!');
-    }
+    const { error } = isEditing
+      ? await supabase.from('studies').update(studyData).eq('id', isEditing)
+      : await supabase.from('studies').insert([studyData]);
 
     setSaving(false);
+    // Em caso de erro o modal fica aberto, para não perder o que foi digitado.
+    if (error) { showToast(isEditing ? 'Erro ao atualizar.' : 'Erro ao criar estudo.', 'error'); return; }
+    showToast(isEditing ? 'Estudo atualizado!' : 'Estudo adicionado!');
     resetForm();
     fetchData();
   };
@@ -70,25 +69,40 @@ export default function Estudos() {
     if (!sessionDesc.trim() || !sessionDate) return;
     setSavingSession(true);
 
-    const { error } = await supabase.from('study_sessions').insert([{
-      study_id: studyId,
+    const sessionData = {
       date: sessionDate,
       video_link: sessionVideo.trim() || null,
       description: sessionDesc.trim()
-    }]);
-
-    if (error) showToast('Erro ao salvar sessão.', 'error');
-    else showToast('Sessão registrada!');
+    };
+    const { error } = editingSessionId
+      ? await supabase.from('study_sessions').update(sessionData).eq('id', editingSessionId)
+      : await supabase.from('study_sessions').insert([{ ...sessionData, study_id: studyId }]);
 
     setSavingSession(false);
-    setSessionDesc('');
-    setSessionVideo('');
-    setActiveStudyId(null);
+    if (error) { showToast('Erro ao salvar sessão.', 'error'); return; }
+    showToast(editingSessionId ? 'Sessão atualizada!' : 'Sessão registrada!');
+    closeSessionForm();
     fetchData();
   };
 
+  const openSessionForm = (studyId: string, sess?: any) => {
+    setActiveStudyId(studyId);
+    setEditingSessionId(sess?.id ?? null);
+    setSessionDate(sess?.date ?? todayLocal());
+    setSessionVideo(sess?.video_link ?? '');
+    setSessionDesc(sess?.description ?? '');
+  };
+
+  const closeSessionForm = () => {
+    setActiveStudyId(null);
+    setEditingSessionId(null);
+    setSessionDesc('');
+    setSessionVideo('');
+  };
+
   const handleDeleteSession = async (id: string) => {
-    if (!confirm('Deletar esta sessão de estudo?')) return;
+    const ok = await confirmAction({ title: 'Deletar sessão?', message: 'As anotações desta sessão serão apagadas.', confirmLabel: 'Deletar', danger: true });
+    if (!ok) return;
     const { error } = await supabase.from('study_sessions').delete().eq('id', id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Sessão removida.', 'info');
@@ -104,9 +118,16 @@ export default function Estudos() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deletar este estudo e TODAS as suas sessões?')) return;
-    const { error } = await supabase.from('studies').delete().eq('id', id);
+  const handleDelete = async (study: any) => {
+    const count = sessions.filter(s => s.study_id === study.id).length;
+    const ok = await confirmAction({
+      title: 'Deletar estudo?',
+      message: `"${study.title}" e ${count === 1 ? 'sua sessão' : `suas ${count} sessões`} serão apagados.`,
+      confirmLabel: 'Deletar',
+      danger: true,
+    });
+    if (!ok) return;
+    const { error } = await supabase.from('studies').delete().eq('id', study.id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Estudo removido.', 'info');
     fetchData();
@@ -162,7 +183,7 @@ export default function Estudos() {
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                   </button>
-                  <button className={`${styles.iconBtn} ${styles.deleteIconBtn}`} onClick={() => handleDelete(study.id)} title="Deletar">
+                  <button className={`${styles.iconBtn} ${styles.deleteIconBtn}`} onClick={() => handleDelete(study)} title="Deletar">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
                     </svg>
@@ -202,11 +223,18 @@ export default function Estudos() {
                         <span className={styles.sessionDate}>
                           {new Date(sess.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </span>
+                        <span style={{ display: 'flex', gap: '2px' }}>
+                        <button className={styles.iconBtn} onClick={() => openSessionForm(study.id, sess)} title="Editar sessão">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
                         <button className={`${styles.iconBtn} ${styles.deleteIconBtn}`} onClick={() => handleDeleteSession(sess.id)} title="Deletar sessão">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
                           </svg>
                         </button>
+                        </span>
                       </div>
 
                       <p className={`${styles.sessionDesc} ${!isExpanded && isLong ? styles.collapsedText : ''}`}>
@@ -252,9 +280,9 @@ export default function Estudos() {
                     />
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }} disabled={savingSession}>
-                        {savingSession ? 'Salvando...' : 'Salvar Sessão'}
+                        {savingSession ? 'Salvando...' : editingSessionId ? 'Atualizar Sessão' : 'Salvar Sessão'}
                       </button>
-                      <button type="button" className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: '0.85rem' }} onClick={() => setActiveStudyId(null)}>
+                      <button type="button" className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: '0.85rem' }} onClick={closeSessionForm}>
                         Cancelar
                       </button>
                     </div>
@@ -262,7 +290,7 @@ export default function Estudos() {
                 ) : (
                   <button
                     className={styles.addSessionBtn}
-                    onClick={() => { setActiveStudyId(study.id); setSessionDesc(''); setSessionVideo(''); }}
+                    onClick={() => openSessionForm(study.id)}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -285,7 +313,7 @@ export default function Estudos() {
           <h1 className="h2">Estudos & Leituras</h1>
           <p className="text-secondary">Acompanhe seus temas de estudo, adicione aulas e anote seus insights.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}>
           + Novo Estudo
         </button>
       </header>

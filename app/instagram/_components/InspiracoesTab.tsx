@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
 import { IgInspiration, IgModel, formats, formatLabel, orNull } from '../types';
 import { EditIcon, LinkIcon, TrashIcon } from './icons';
@@ -61,7 +62,7 @@ export default function InspiracoesTab({ inspirations, models, onChange }: Props
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deletar esta inspiração?')) return;
+    if (!(await confirmAction({ title: 'Deletar inspiração?', message: 'Ideias criadas a partir dela continuam, só perdem o vínculo.', confirmLabel: 'Deletar', danger: true }))) return;
     const { error } = await supabase.from('ig_inspirations').delete().eq('id', id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Inspiração removida.', 'info');

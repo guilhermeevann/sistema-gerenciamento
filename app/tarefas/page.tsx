@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import styles from './tarefas.module.css';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 
 const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const daysShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -23,10 +24,7 @@ export default function Tarefas() {
 
   const todayIndex = new Date().getDay();
 
-  useEffect(() => { fetchTasks(); }, []);
-
   const fetchTasks = async () => {
-    setLoading(true);
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
@@ -36,6 +34,8 @@ export default function Tarefas() {
     else if (data) setTasks(data);
     setLoading(false);
   };
+
+  useEffect(() => { fetchTasks(); }, []);
 
   const toggleDay = (idx: number) => {
     setSelectedDays(prev =>
@@ -56,23 +56,23 @@ export default function Tarefas() {
       title: title.trim(),
       type,
       day_of_week: type === 'extra' && dayOfWeek !== '' ? Number(dayOfWeek) : null,
-      days_of_week: type === 'weekly' ? selectedDays.sort() : null,
+      days_of_week: type === 'weekly' ? [...selectedDays].sort((a, b) => a - b) : null,
     };
 
-    if (isEditing) {
-      const { error } = await supabase.from('tasks').update(taskData).eq('id', isEditing);
-      if (error) showToast('Erro ao atualizar tarefa.', 'error');
-      else showToast('Tarefa atualizada!');
-    } else {
+    if (!isEditing) {
       // New task gets sort_order = max + 1
       const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.sort_order ?? 0)) : 0;
       taskData.sort_order = maxOrder + 1;
-      const { error } = await supabase.from('tasks').insert([taskData]);
-      if (error) showToast('Erro ao criar tarefa.', 'error');
-      else showToast('Tarefa adicionada!');
     }
 
+    const { error } = isEditing
+      ? await supabase.from('tasks').update(taskData).eq('id', isEditing)
+      : await supabase.from('tasks').insert([taskData]);
+
     setSaving(false);
+    // Em caso de erro o modal fica aberto, para não perder o que foi digitado.
+    if (error) { showToast(isEditing ? 'Erro ao atualizar tarefa.' : 'Erro ao criar tarefa.', 'error'); return; }
+    showToast(isEditing ? 'Tarefa atualizada!' : 'Tarefa adicionada!');
     resetForm();
     fetchTasks();
   };
@@ -88,24 +88,26 @@ export default function Tarefas() {
     const taskA = dayTasks[idx];
     const taskB = dayTasks[swapIdx];
 
-    // Swap sort_order values
-    const orderA = taskA.sort_order ?? 0;
-    const orderB = taskB.sort_order ?? 0;
+    // Troca as duas de posição na lista global e renumera 1..n. Trocar só os dois
+    // sort_order falhava quando eles eram iguais (ou nulos): nada mudava.
+    const previous = tasks;
+    const ordered = [...tasks];
+    const posA = ordered.findIndex(t => t.id === taskA.id);
+    const posB = ordered.findIndex(t => t.id === taskB.id);
+    [ordered[posA], ordered[posB]] = [ordered[posB], ordered[posA]];
+    const renumbered = ordered.map((t, i) => ({ ...t, sort_order: i + 1 }));
+    const originalOrder = new Map(tasks.map(t => [t.id, t.sort_order]));
+    const changed = renumbered.filter(t => originalOrder.get(t.id) !== t.sort_order);
 
-    // Optimistic update
-    setTasks(prev =>
-      prev.map(t => {
-        if (t.id === taskA.id) return { ...t, sort_order: orderB };
-        if (t.id === taskB.id) return { ...t, sort_order: orderA };
-        return t;
-      }).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    setTasks(renumbered);
+
+    const results = await Promise.all(
+      changed.map(t => supabase.from('tasks').update({ sort_order: t.sort_order }).eq('id', t.id))
     );
-
-    // Persist
-    await Promise.all([
-      supabase.from('tasks').update({ sort_order: orderB }).eq('id', taskA.id),
-      supabase.from('tasks').update({ sort_order: orderA }).eq('id', taskB.id),
-    ]);
+    if (results.some(r => r.error)) {
+      setTasks(previous);
+      showToast('Não foi possível reordenar. Tente de novo.', 'error');
+    }
   };
 
   const handleEdit = (task: any) => {
@@ -117,16 +119,24 @@ export default function Tarefas() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deletar esta tarefa?')) return;
-    const { error } = await supabase.from('tasks').delete().eq('id', id);
+  const handleDelete = async (task: any) => {
+    const ok = await confirmAction({ title: 'Deletar tarefa?', message: `"${task.title}" será removida de todos os dias em que aparece.`, confirmLabel: 'Deletar', danger: true });
+    if (!ok) return;
+    const { error } = await supabase.from('tasks').delete().eq('id', task.id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Tarefa removida.', 'info');
     fetchTasks();
   };
 
   const handleClearAll = async () => {
-    if (!confirm('Deletar TODAS as tarefas? Esta ação não pode ser desfeita.')) return;
+    const ok = await confirmAction({
+      title: 'Deletar todas as tarefas?',
+      message: `As ${tasks.length} tarefas, incluindo rotinas diárias e fixas semanais, serão apagadas. Não dá para desfazer.`,
+      confirmLabel: 'Apagar tudo',
+      danger: true,
+      requireText: 'APAGAR',
+    });
+    if (!ok) return;
     const { error } = await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     if (error) showToast('Erro ao limpar.', 'error');
     else showToast('Todas as tarefas foram removidas.', 'info');
@@ -139,11 +149,23 @@ export default function Tarefas() {
       showToast('Nenhuma tarefa avulsa para remover.', 'info');
       return;
     }
-    if (!confirm(`Remover ${extras.length} tarefa(s) avulsa(s) da semana? Rotinas diárias e semanais fixas serão mantidas.`)) return;
+    const ok = await confirmAction({
+      title: 'Zerar a semana?',
+      message: `Remove ${extras.length} tarefa(s) avulsa(s). Rotinas diárias e fixas semanais continuam.`,
+      confirmLabel: 'Zerar semana',
+      danger: true,
+    });
+    if (!ok) return;
     const { error } = await supabase.from('tasks').delete().eq('type', 'extra');
     if (error) showToast('Erro ao zerar semana.', 'error');
     else showToast(`${extras.length} tarefa(s) avulsa(s) removida(s).`, 'info');
     fetchTasks();
+  };
+
+  const openNew = (day?: number) => {
+    resetForm();
+    if (day !== undefined) { setType('extra'); setDayOfWeek(day); }
+    setIsModalOpen(true);
   };
 
   const resetForm = () => {
@@ -175,7 +197,7 @@ export default function Tarefas() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Rotina & Tarefas</h1>
-          <p className="text-secondary">O dia de hoje está destacado. Use ↑ ↓ para reordenar.</p>
+          <p className="text-secondary">O dia de hoje está destacado. Use ↑ ↓ para reordenar e + para adicionar num dia.</p>
         </div>
         <div className={styles.headerActions}>
           {tasks.some(t => t.type === 'extra') && (
@@ -189,7 +211,7 @@ export default function Tarefas() {
               Limpar Tudo
             </button>
           )}
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary" onClick={() => openNew()}>
             + Nova Tarefa
           </button>
         </div>
@@ -214,7 +236,7 @@ export default function Tarefas() {
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <p>Nenhuma tarefa criada ainda.</p>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <button className="btn btn-primary" onClick={() => openNew()}>
               Criar primeira tarefa
             </button>
           </div>
@@ -227,8 +249,11 @@ export default function Tarefas() {
               return (
                 <div key={dayIdx} className={`${styles.dayColumn} ${isToday ? styles.today : ''}`}>
                   <div className={styles.dayHeader}>
-                    {dayName}
-                    {isToday && <span className={styles.todayBadge}>Hoje</span>}
+                    <span>
+                      {dayName}
+                      {isToday && <span className={styles.todayBadge}>Hoje</span>}
+                    </span>
+                    <button className={styles.dayAddBtn} onClick={() => openNew(dayIdx)} title={`Nova tarefa avulsa para ${dayName}`} aria-label={`Nova tarefa para ${dayName}`}>+</button>
                   </div>
 
                   <div className={styles.taskList}>
@@ -283,7 +308,7 @@ export default function Tarefas() {
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                   </svg>
                                 </button>
-                                <button className={`${styles.iconBtn} ${styles.deleteIcon}`} onClick={() => handleDelete(task.id)} title="Deletar">
+                                <button className={`${styles.iconBtn} ${styles.deleteIcon}`} onClick={() => handleDelete(task)} title="Deletar">
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
                                   </svg>

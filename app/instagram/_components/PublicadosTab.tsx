@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
+import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
 import { IgIdea, IgModel, formatDate, formatLabel, formatNumber, performanceOptions, performed } from '../types';
 import { EditIcon, LinkIcon, TrashIcon } from './icons';
@@ -11,6 +12,7 @@ interface Props {
   ideas: IgIdea[];
   models: IgModel[];
   onEdit: (idea: IgIdea) => void;
+  onNew: () => void;
   onChange: () => void;
 }
 
@@ -24,7 +26,7 @@ const sortOptions: { value: SortKey; label: string }[] = [
   { value: 'follows', label: 'Mais seguidores' },
 ];
 
-export default function PublicadosTab({ ideas, models, onEdit, onChange }: Props) {
+export default function PublicadosTab({ ideas, models, onEdit, onNew, onChange }: Props) {
   const [onlyHits, setOnlyHits] = useState(false);
   const [sort, setSort] = useState<SortKey>('published_at');
   const [modelFilter, setModelFilter] = useState('');
@@ -39,7 +41,7 @@ export default function PublicadosTab({ ideas, models, onEdit, onChange }: Props
     });
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deletar este post do histórico?')) return;
+    if (!(await confirmAction({ title: 'Deletar post do histórico?', message: 'O registro e as métricas deste post serão apagados.', confirmLabel: 'Deletar', danger: true }))) return;
     const { error } = await supabase.from('ig_ideas').delete().eq('id', id);
     if (error) showToast('Erro ao deletar.', 'error');
     else showToast('Post removido.', 'info');
@@ -65,6 +67,7 @@ export default function PublicadosTab({ ideas, models, onEdit, onChange }: Props
           <select value={sort} onChange={e => setSort(e.target.value as SortKey)}>
             {sortOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
+          <button className="btn btn-primary" onClick={onNew}>+ Registrar post</button>
         </div>
       </div>
 

@@ -144,6 +144,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.95rem;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
@@ -223,4 +224,70 @@ input:focus, textarea:focus, select:focus {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Main area */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 40px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* Keyboard focus */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Shared page states */
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px;
+  color: var(--text-secondary);
+}
+
+.page-loading::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-success);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile: sidebar vira barra inferior (ver Sidebar.module.css) */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
+    padding: 20px 16px 96px;
+  }
+
+  .h1 { font-size: 1.9rem; }
+  .h2 { font-size: 1.55rem; }
+  .h3 { font-size: 1.25rem; }
 }

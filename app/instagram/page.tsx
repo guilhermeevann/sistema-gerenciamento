@@ -165,7 +165,7 @@ export default function Instagram() {
           {tab === 'inspiracoes' && <InspiracoesTab inspirations={inspirations} models={models} onChange={fetchData} />}
           {tab === 'tempestade' && <TempestadeTab ideas={ideas} onEdit={idea => openIdea(idea)} onChange={fetchData} />}
           {tab === 'banco' && <BancoTab ideas={ideas} models={models} onNew={() => openIdea(null, 'pronta')} onEdit={openIdea} onChange={fetchData} />}
-          {tab === 'publicados' && <PublicadosTab ideas={ideas} models={models} onEdit={idea => openIdea(idea)} onChange={fetchData} />}
+          {tab === 'publicados' && <PublicadosTab ideas={ideas} models={models} onEdit={idea => openIdea(idea)} onNew={() => openIdea(null, 'publicado')} onChange={fetchData} />}
         </>
       )}
 

@@ -11,6 +11,7 @@ interface Toast {
   type: ToastType;
 }
 
+let toastSeq = 0;
 let toastCallback: ((message: string, type: ToastType) => void) | null = null;
 
 export const showToast = (message: string, type: ToastType = 'success') => {
@@ -22,7 +23,7 @@ export default function ToastContainer() {
 
   useEffect(() => {
     toastCallback = (message, type) => {
-      const id = Date.now().toString();
+      const id = String(++toastSeq);
       setToasts(prev => [...prev, { id, message, type }]);
       setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
     };
@@ -30,7 +31,7 @@ export default function ToastContainer() {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} role="status" aria-live="polite">
       {toasts.map(toast => (
         <div key={toast.id} className={`${styles.toast} ${styles[toast.type]}`}>
           <span className={styles.icon}>

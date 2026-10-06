@@ -77,24 +77,28 @@ export default function Tarefas() {
     fetchTasks();
   };
 
-  // Move task up or down within a given day's task list
-  const handleMove = async (dayIndex: number, taskId: string, direction: 'up' | 'down') => {
+  // Move a tarefa dentro da lista do dia: uma posição, ou direto para o topo / o fim.
+  const handleMove = async (dayIndex: number, taskId: string, direction: 'up' | 'down' | 'top' | 'bottom') => {
     const dayTasks = getTasksForDay(dayIndex);
     const idx = dayTasks.findIndex(t => t.id === taskId);
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    const target =
+      direction === 'top' ? 0 :
+      direction === 'bottom' ? dayTasks.length - 1 :
+      direction === 'up' ? idx - 1 : idx + 1;
 
-    if (swapIdx < 0 || swapIdx >= dayTasks.length) return;
+    if (target < 0 || target >= dayTasks.length || target === idx) return;
 
-    const taskA = dayTasks[idx];
-    const taskB = dayTasks[swapIdx];
+    const newDayOrder = [...dayTasks];
+    const [moved] = newDayOrder.splice(idx, 1);
+    newDayOrder.splice(target, 0, moved);
 
-    // Troca as duas de posição na lista global e renumera 1..n. Trocar só os dois
-    // sort_order falhava quando eles eram iguais (ou nulos): nada mudava.
+    // As tarefas do dia ocupam certas posições na lista global; elas são
+    // redistribuídas nessas mesmas posições na nova ordem, e tudo é renumerado
+    // 1..n (sort_order iguais ou nulos não travam a reordenação).
     const previous = tasks;
-    const ordered = [...tasks];
-    const posA = ordered.findIndex(t => t.id === taskA.id);
-    const posB = ordered.findIndex(t => t.id === taskB.id);
-    [ordered[posA], ordered[posB]] = [ordered[posB], ordered[posA]];
+    const dayIds = new Set(dayTasks.map(t => t.id));
+    let next = 0;
+    const ordered = tasks.map(t => (dayIds.has(t.id) ? newDayOrder[next++] : t));
     const renumbered = ordered.map((t, i) => ({ ...t, sort_order: i + 1 }));
     const originalOrder = new Map(tasks.map(t => [t.id, t.sort_order]));
     const changed = renumbered.filter(t => originalOrder.get(t.id) !== t.sort_order);
@@ -197,7 +201,7 @@ export default function Tarefas() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Rotina & Tarefas</h1>
-          <p className="text-secondary">O dia de hoje está destacado. Use ↑ ↓ para reordenar e + para adicionar num dia.</p>
+          <p className="text-secondary">O dia de hoje está destacado. Use as setas para reordenar (ou mandar direto pro topo/fim) e + para adicionar num dia.</p>
         </div>
         <div className={styles.headerActions}>
           {tasks.some(t => t.type === 'extra') && (
@@ -275,9 +279,21 @@ export default function Tarefas() {
                             <div className={styles.reorderBtns}>
                               <button
                                 className={styles.reorderBtn}
+                                onClick={() => handleMove(dayIdx, task.id, 'top')}
+                                disabled={isFirst}
+                                title="Mover para o topo"
+                                aria-label="Mover para o topo"
+                              >
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <line x1="6" y1="4" x2="18" y2="4"></line><polyline points="18 16 12 10 6 16"></polyline>
+                                </svg>
+                              </button>
+                              <button
+                                className={styles.reorderBtn}
                                 onClick={() => handleMove(dayIdx, task.id, 'up')}
                                 disabled={isFirst}
                                 title="Mover para cima"
+                                aria-label="Mover para cima"
                               >
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="18 15 12 9 6 15"></polyline>
@@ -288,9 +304,21 @@ export default function Tarefas() {
                                 onClick={() => handleMove(dayIdx, task.id, 'down')}
                                 disabled={isLast}
                                 title="Mover para baixo"
+                                aria-label="Mover para baixo"
                               >
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                              </button>
+                              <button
+                                className={styles.reorderBtn}
+                                onClick={() => handleMove(dayIdx, task.id, 'bottom')}
+                                disabled={isLast}
+                                title="Mover para o fim"
+                                aria-label="Mover para o fim"
+                              >
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="6 8 12 14 18 8"></polyline><line x1="6" y1="20" x2="18" y2="20"></line>
                                 </svg>
                               </button>
                             </div>

@@ -61,12 +61,12 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
     runUpdates([{ id: idea.id, data: { priority, sort_order: last + 1 } }], `Movida para ${label}`);
   };
 
-  // Troca de posição dentro da faixa e renumera a faixa inteira (1..n).
-  const reorder = (group: IgIdea[], index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= group.length) return;
+  // Move para a posição `target` dentro da faixa (vizinha, topo ou fim) e renumera a faixa (1..n).
+  const reorder = (group: IgIdea[], index: number, target: number) => {
+    if (target < 0 || target >= group.length || target === index) return;
     const ordered = [...group];
-    [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+    const [moved] = ordered.splice(index, 1);
+    ordered.splice(target, 0, moved);
     runUpdates(
       ordered
         .map((idea, i) => ({ idea, order: i + 1 }))
@@ -78,13 +78,19 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
   const renderCard = (idea: IgIdea, reorderCtx?: { group: IgIdea[]; index: number }) => {
     const model = models.find(m => m.id === idea.model_id);
     const isReady = idea.status === 'pronta';
+    const group = reorderCtx?.group ?? [];
+    const index = reorderCtx?.index ?? 0;
+    const isFirst = index === 0;
+    const isLast = index === group.length - 1;
     return (
       <div key={idea.id} className={`${styles.card} ${idea.priority === 1 && isReady ? styles.cardUrgent : ''} glass-panel`}>
         <div className={styles.cardHeader}>
           {reorderCtx && hasPriority && !query && (
             <div className={styles.reorder}>
-              <button className={styles.iconBtn} disabled={busy || reorderCtx.index === 0} onClick={() => reorder(reorderCtx.group, reorderCtx.index, -1)} title="Subir" aria-label="Subir">▲</button>
-              <button className={styles.iconBtn} disabled={busy || reorderCtx.index === reorderCtx.group.length - 1} onClick={() => reorder(reorderCtx.group, reorderCtx.index, 1)} title="Descer" aria-label="Descer">▼</button>
+              <button className={styles.iconBtn} disabled={busy || isFirst} onClick={() => reorder(group, index, 0)} title="Mandar para o topo" aria-label="Mandar para o topo">⤒</button>
+              <button className={styles.iconBtn} disabled={busy || isFirst} onClick={() => reorder(group, index, index - 1)} title="Subir" aria-label="Subir">▲</button>
+              <button className={styles.iconBtn} disabled={busy || isLast} onClick={() => reorder(group, index, index + 1)} title="Descer" aria-label="Descer">▼</button>
+              <button className={styles.iconBtn} disabled={busy || isLast} onClick={() => reorder(group, index, group.length - 1)} title="Mandar para o fim" aria-label="Mandar para o fim">⤓</button>
             </div>
           )}
           <button className={styles.cardTitleBtn} onClick={() => onEdit(idea)} title="Abrir ideia">{idea.title}</button>
@@ -145,7 +151,7 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Banco de ideias</h2>
-          <p className={styles.sectionHint}>Tudo que ainda não virou post. Priorize o que vai gravar primeiro e use ▲▼ para ordenar.</p>
+          <p className={styles.sectionHint}>Tudo que ainda não virou post. Priorize o que vai gravar primeiro; ▲▼ move uma posição, ⤒⤓ manda direto pro topo ou pro fim.</p>
         </div>
         <button className="btn btn-primary" onClick={onNew}>+ Nova ideia</button>
       </div>

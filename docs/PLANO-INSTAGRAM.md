@@ -58,3 +58,12 @@ Apagar um modelo ou inspiração não apaga as ideias ligadas (`on delete set nu
 - Puxar métricas automaticamente da Graph API da Meta
 - Calendário editorial (arrastar ideia pronta para um dia)
 - Upload de print/thumbnail da inspiração
+
+## Acesso de outras sessões (06/10/2026)
+
+- **Consultar os próximos posts:** `node scripts/proximos-posts.mjs` (`--completo` inclui gancho e
+  roteiro). Só lê, na ordem do Banco de ideias: em produção, Gravar agora, Próximas, Depois.
+- **Credenciais:** `.env.local` deste projeto (`NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Fica fora do git; ler do arquivo, nunca copiar o valor.
+- **Prioridade:** `ig_ideas.priority` (1 gravar agora, 2 próximas, 3 depois) e `sort_order`
+  (ordem manual dentro da faixa). SQL em `supabase/ig_prioridade.sql`.

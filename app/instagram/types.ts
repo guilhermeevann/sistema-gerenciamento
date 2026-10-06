@@ -43,6 +43,9 @@ export interface IgIdea {
   follows: number | null;
   performance: Performance | null;
   learnings: string | null;
+  // Só existem depois de rodar supabase/ig_prioridade.sql.
+  priority?: number;
+  sort_order?: number | null;
   created_at: string;
 }
 
@@ -83,3 +86,15 @@ export const matchesSearch = (idea: IgIdea, query: string) => {
   const haystack = fold([idea.title, idea.hook, idea.description, idea.pillar].filter(Boolean).join(' '));
   return fold(query).trim().split(/\s+/).every(term => haystack.includes(term));
 };
+
+export const priorityLevels = [
+  { value: 1, label: '🔥 Gravar agora', short: 'Agora' },
+  { value: 2, label: '⏭️ Próximas', short: 'Próxima' },
+  { value: 3, label: '🕓 Depois', short: 'Depois' },
+];
+
+// Faixa de prioridade, depois ordem manual, depois as mais antigas primeiro.
+export const byPriority = (a: IgIdea, b: IgIdea) =>
+  (a.priority ?? 2) - (b.priority ?? 2) ||
+  (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER) ||
+  a.created_at.localeCompare(b.created_at);

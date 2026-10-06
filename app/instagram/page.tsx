@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
 import styles from './instagram.module.css';
-import { IdeaStatus, IgIdea, IgInspiration, IgModel, formatNumber, performanceOptions, performed } from './types';
+import { IdeaStatus, IgIdea, IgInspiration, IgModel, byPriority, formatNumber, performanceOptions, performed } from './types';
 import ModelosTab from './_components/ModelosTab';
 import InspiracoesTab from './_components/InspiracoesTab';
 import TempestadeTab from './_components/TempestadeTab';
@@ -65,7 +65,7 @@ export default function Instagram() {
     .sort((a, b) => (b.views ?? -1) - (a.views ?? -1))
     .slice(0, 5);
 
-  const readyIdeas = ideas.filter(i => i.status === 'pronta').slice(0, 5);
+  const readyIdeas = ideas.filter(i => i.status === 'pronta').sort(byPriority).slice(0, 5);
 
   const renderOverview = () => (
     <section className={styles.section}>

@@ -7,6 +7,7 @@ import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
 import { IdeaStatus, IgIdea, IgModel, byPriority, formatLabel, matchesSearch, priorityLevels } from '../types';
 import { ArrowIcon, BackIcon, EditIcon, TrashIcon } from './icons';
+import ScriptReader from './ScriptReader';
 
 interface Props {
   ideas: IgIdea[];
@@ -21,12 +22,17 @@ const MIGRATION_HINT = 'Falta rodar supabase/ig_prioridade.sql no Supabase.';
 export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Props) {
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(false);
+  const [readingId, setReadingId] = useState<string | null>(null);
 
   // As colunas de prioridade só existem depois do SQL; sem elas a ordenação fica desligada.
   const hasPriority = ideas.length === 0 || 'priority' in ideas[0];
 
   const ready = ideas.filter(i => i.status === 'pronta').sort(byPriority);
   const inProduction = ideas.filter(i => i.status === 'producao').sort(byPriority);
+
+  // Fila de leitura na ordem de gravação: em produção, depois prontas por prioridade.
+  const readingQueue = [...inProduction, ...ready].filter(i => i.hook || i.description);
+  const readingIndex = readingQueue.findIndex(i => i.id === readingId);
 
   const move = async (id: string, status: IdeaStatus) => {
     const { error } = await supabase.from('ig_ideas').update({ status }).eq('id', id);
@@ -127,6 +133,9 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
         )}
 
         <div className={styles.cardFooter}>
+          {(idea.hook || idea.description) && (
+            <button className={`btn ${styles.readBtn} ${styles.smallBtn}`} onClick={() => setReadingId(idea.id)}>📖 Ler roteiro</button>
+          )}
           {isReady ? (
             <>
               <button className={`btn btn-secondary ${styles.smallBtn}`} onClick={() => move(idea.id, 'brainstorm')}><BackIcon /> Tempestade</button>
@@ -194,6 +203,14 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
           {productionVisible.map(idea => renderCard(idea))}
         </div>
       </div>
+      {readingIndex >= 0 && (
+        <ScriptReader
+          ideas={readingQueue}
+          index={readingIndex}
+          onIndexChange={i => setReadingId(readingQueue[i]?.id ?? null)}
+          onClose={() => setReadingId(null)}
+        />
+      )}
     </section>
   );
 }

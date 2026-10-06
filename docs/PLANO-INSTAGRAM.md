@@ -67,3 +67,6 @@ Apagar um modelo ou inspiração não apaga as ideias ligadas (`on delete set nu
   `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Fica fora do git; ler do arquivo, nunca copiar o valor.
 - **Prioridade:** `ig_ideas.priority` (1 gravar agora, 2 próximas, 3 depois) e `sort_order`
   (ordem manual dentro da faixa). SQL em `supabase/ig_prioridade.sql`.
+- **Banco de ganchos** (06/10/2026): aba Modelos, tabela `ig_hooks` (`text`, `category`, `profile`,
+  `url`, `notes`). SQL em `supabase/ig_ganchos.sql`. "Virar ideia" cria uma ideia na Tempestade
+  com o gancho preenchido.

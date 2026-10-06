@@ -8,6 +8,7 @@ import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
 import { IgIdea, IgModel, formats, formatLabel, orNull, performed } from '../types';
 import { EditIcon, LinkIcon, TrashIcon } from './icons';
+import GanchosSection from './GanchosSection';
 
 interface Props {
   models: IgModel[];
@@ -71,6 +72,7 @@ export default function ModelosTab({ models, ideas, onChange }: Props) {
   const sorted = [...models].sort((a, b) => Number(b.is_main) - Number(a.is_main));
 
   return (
+    <>
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <div>
@@ -149,5 +151,8 @@ export default function ModelosTab({ models, ideas, onChange }: Props) {
         </form>
       </Modal>
     </section>
+
+    <GanchosSection onIdeaCreated={onChange} />
+    </>
   );
 }

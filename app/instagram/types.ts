@@ -12,6 +12,20 @@ export interface IgModel {
   created_at: string;
 }
 
+export interface IgHook {
+  id: string;
+  text: string;
+  category: string | null;
+  profile: string | null;
+  url: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export const hookCategories = [
+  'Curiosidade', 'Polêmica', 'Número / lista', 'Dor', 'Promessa', 'História', 'Pergunta', 'Quebra de padrão',
+];
+
 export interface IgInspiration {
   id: string;
   title: string;

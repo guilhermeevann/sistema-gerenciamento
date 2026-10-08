@@ -7,7 +7,7 @@ import { showToast } from '@/components/Toast';
 import { todayLocal } from '@/lib/date';
 import styles from '../instagram.module.css';
 import {
-  IdeaStatus, IgIdea, IgInspiration, IgModel, formats, numOrNull, orNull, performanceOptions,
+  IdeaStatus, IgIdea, IgInspiration, IgModel, formats, numOrNull, orNull, performanceOptions, productionTypes,
 } from '../types';
 
 interface Props {
@@ -19,6 +19,8 @@ interface Props {
   inspirations: IgInspiration[];
   onClose: () => void;
   onSaved: () => void;
+  // false enquanto a coluna production_type não existe no banco.
+  typeEnabled: boolean;
 }
 
 const statusOptions: { value: IdeaStatus; label: string }[] = [
@@ -45,6 +47,7 @@ const toForm = (idea: IgIdea | null, status: IdeaStatus) => ({
   description: idea?.description ?? '',
   status,
   format: idea?.format ?? '',
+  production_type: idea?.production_type ?? '',
   pillar: idea?.pillar ?? '',
   model_id: idea?.model_id ?? '',
   inspiration_id: idea?.inspiration_id ?? '',
@@ -55,9 +58,10 @@ const toForm = (idea: IgIdea | null, status: IdeaStatus) => ({
   ...Object.fromEntries(metricFields.map(m => [m.key, idea?.[m.key]?.toString() ?? ''])) as Record<MetricKey, string>,
 });
 
-export default function IdeaModal({ isOpen, idea, status, models, inspirations, onClose, onSaved }: Props) {
+export default function IdeaModal({ isOpen, idea, status, models, inspirations, onClose, onSaved, typeEnabled }: Props) {
   const [form, setForm] = useState(() => toForm(idea, status));
   const [saving, setSaving] = useState(false);
+  const hasType = typeEnabled;
 
   const set = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -72,6 +76,8 @@ export default function IdeaModal({ isOpen, idea, status, models, inspirations, 
       description: orNull(form.description),
       status: form.status,
       format: form.format || null,
+      // Só envia o campo se a coluna já existe (SQL ig_tipo_producao rodado).
+      ...(hasType ? { production_type: form.production_type || null } : {}),
       pillar: orNull(form.pillar),
       model_id: form.model_id || null,
       inspiration_id: form.inspiration_id || null,
@@ -115,6 +121,15 @@ export default function IdeaModal({ isOpen, idea, status, models, inspirations, 
             </select>
           </div>
         </div>
+        {hasType && (
+          <div className={styles.formGroup}>
+            <label>Tipo de produção</label>
+            <select value={form.production_type} onChange={e => set('production_type', e.target.value)}>
+              <option value="">Sem tipo</option>
+              {productionTypes.map(t => <option key={t.value} value={t.value}>{t.label} · {t.hint}</option>)}
+            </select>
+          </div>
+        )}
         <div className={styles.formGroup}>
           <label>Gancho</label>
           <input value={form.hook} onChange={e => set('hook', e.target.value)} placeholder="A primeira frase / os 3 primeiros segundos" />

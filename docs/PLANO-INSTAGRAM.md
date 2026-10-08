@@ -70,3 +70,6 @@ Apagar um modelo ou inspiração não apaga as ideias ligadas (`on delete set nu
 - **Banco de ganchos** (06/10/2026): aba Modelos, tabela `ig_hooks` (`text`, `category`, `profile`,
   `url`, `notes`). SQL em `supabase/ig_ganchos.sql`. "Virar ideia" cria uma ideia na Tempestade
   com o gancho preenchido.
+- **Tipo de produção** (08/10/2026): `ig_ideas.production_type` (`rapido` = ~7s já gravado +
+  legenda fixa + música, `fundo` = texto sobre vídeo de background, `roteiro` = gravar, editar e
+  postar). SQL em `supabase/ig_tipo_producao.sql`. Filtro no Banco de ideias e cor no card.

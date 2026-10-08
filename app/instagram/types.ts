@@ -1,4 +1,5 @@
 export type IdeaStatus = 'brainstorm' | 'pronta' | 'producao' | 'publicado';
+export type ProductionType = 'rapido' | 'fundo' | 'roteiro';
 export type Performance = 'viral' | 'bom' | 'medio' | 'fraco';
 
 export interface IgModel {
@@ -60,6 +61,8 @@ export interface IgIdea {
   // Só existem depois de rodar supabase/ig_prioridade.sql.
   priority?: number;
   sort_order?: number | null;
+  // Só existe depois de rodar supabase/ig_tipo_producao.sql.
+  production_type?: ProductionType | null;
   created_at: string;
 }
 
@@ -112,3 +115,13 @@ export const byPriority = (a: IgIdea, b: IgIdea) =>
   (a.priority ?? 2) - (b.priority ?? 2) ||
   (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER) ||
   a.created_at.localeCompare(b.created_at);
+
+// Como a peça é produzida: define o esforço e a cor do card no banco de ideias.
+export const productionTypes: { value: ProductionType; label: string; short: string; hint: string }[] = [
+  { value: 'rapido', label: '⚡ Rápido 7s', short: '⚡ Rápido', hint: 'Trecho já gravado + legenda fixa + música' },
+  { value: 'fundo', label: '🎞️ Fundo', short: '🎞️ Fundo', hint: 'Texto sobre vídeo de background' },
+  { value: 'roteiro', label: '🎬 Roteiro', short: '🎬 Roteiro', hint: 'Gravar o roteiro, editar e postar' },
+];
+
+export const productionTypeLabel = (value?: string | null) =>
+  productionTypes.find(t => t.value === value)?.label ?? null;

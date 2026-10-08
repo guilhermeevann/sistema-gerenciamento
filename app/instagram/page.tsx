@@ -178,6 +178,7 @@ export default function Instagram() {
         inspirations={inspirations}
         onClose={() => setIdeaModal(prev => ({ ...prev, open: false }))}
         onSaved={fetchData}
+        typeEnabled={ideas.length === 0 || 'production_type' in ideas[0]}
       />
     </div>
   );

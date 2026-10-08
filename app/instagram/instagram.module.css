@@ -648,3 +648,81 @@
   background: rgba(139, 92, 246, 0.24);
   color: #fff;
 }
+
+/* Tipo de produção */
+.typeFilter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.typeTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
+}
+
+.typeTab:hover {
+  color: var(--text-primary);
+  border-color: var(--border-color-hover);
+}
+
+.typeTabActive {
+  color: var(--text-primary);
+  background: var(--bg-surface-hover);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.typeRapidoTab.typeTabActive { border-color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
+.typeFundoTab.typeTabActive { border-color: #a78bfa; background: rgba(139, 92, 246, 0.14); }
+.typeRoteiroTab.typeTabActive { border-color: #f472b6; background: rgba(236, 72, 153, 0.12); }
+
+/* Faixa colorida à esquerda do card */
+.typeRapido { border-left: 4px solid #38bdf8; }
+.typeFundo { border-left: 4px solid #a78bfa; }
+.typeRoteiro { border-left: 4px solid #f472b6; }
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.typeRapidoBadge { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
+.typeFundoBadge { background: rgba(139, 92, 246, 0.14); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+.typeRoteiroBadge { background: rgba(236, 72, 153, 0.14); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+.classify {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.classifyBtn {
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-color-hover);
+}
+
+.classifyBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.05);
+}

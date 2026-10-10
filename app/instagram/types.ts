@@ -1,5 +1,5 @@
 export type IdeaStatus = 'brainstorm' | 'pronta' | 'producao' | 'publicado';
-export type ProductionType = 'rapido' | 'fundo' | 'roteiro';
+export type ProductionType = 'rapido' | 'fundo' | 'roteiro' | 'estatico';
 export type Performance = 'viral' | 'bom' | 'medio' | 'fraco';
 
 export interface IgModel {
@@ -121,6 +121,7 @@ export const productionTypes: { value: ProductionType; label: string; short: str
   { value: 'rapido', label: '⚡ Rápido 7s', short: '⚡ Rápido', hint: 'Trecho já gravado + legenda fixa + música' },
   { value: 'fundo', label: '🎞️ Fundo', short: '🎞️ Fundo', hint: 'Texto sobre vídeo de background' },
   { value: 'roteiro', label: '🎬 Roteiro', short: '🎬 Roteiro', hint: 'Gravar o roteiro, editar e postar' },
+  { value: 'estatico', label: '🖼️ Carrossel / estático', short: '🖼️ Estático', hint: 'Carrossel ou imagem única, sem vídeo' },
 ];
 
 export const productionTypeLabel = (value?: string | null) =>

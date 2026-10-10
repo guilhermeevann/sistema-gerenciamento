@@ -38,7 +38,7 @@ const byPriority = (a, b) =>
 
 const levels = { 1: '🔥 Gravar agora', 2: '⏭️ Próximas', 3: '🕓 Depois' };
 const formats = { reels: 'Reels', carrossel: 'Carrossel', estatico: 'Estático', stories: 'Stories' };
-const types = { rapido: '⚡ Rápido 7s', fundo: '🎞️ Fundo', roteiro: '🎬 Roteiro' };
+const types = { rapido: '⚡ Rápido 7s', fundo: '🎞️ Fundo', roteiro: '🎬 Roteiro', estatico: '🖼️ Carrossel / estático' };
 
 const line = (idea, n) => {
   const meta = [types[idea.production_type], formats[idea.format], modelName[idea.model_id], idea.pillar].filter(Boolean).join(' · ');

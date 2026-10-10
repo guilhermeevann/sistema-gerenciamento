@@ -26,6 +26,7 @@ const typeClass: Record<ProductionType, string> = {
   rapido: 'typeRapido',
   fundo: 'typeFundo',
   roteiro: 'typeRoteiro',
+  estatico: 'typeEstatico',
 };
 
 export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Props) {

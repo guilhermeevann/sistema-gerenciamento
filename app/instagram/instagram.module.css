@@ -726,3 +726,8 @@
   border-style: solid;
   background: rgba(255, 255, 255, 0.05);
 }
+
+/* Quarto tipo: carrossel / estático */
+.typeEstatico { border-left: 4px solid #fbbf24; }
+.typeEstaticoBadge { background: rgba(245, 158, 11, 0.14); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.typeEstaticoTab.typeTabActive { border-color: #fbbf24; background: rgba(245, 158, 11, 0.12); }

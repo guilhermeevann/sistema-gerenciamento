@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
 import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../instagram.module.css';
-import { IgIdea, formatLabel, matchesSearch } from '../types';
+import { IgIdea, formatLabel, matchesSearch, productionTypeLabel } from '../types';
 import { ArrowIcon, EditIcon, TrashIcon } from './icons';
 
 interface Props {
@@ -73,9 +73,9 @@ export default function TempestadeTab({ ideas, onEdit, onChange }: Props) {
             <div key={idea.id} className={`${styles.brainItem} glass-panel`}>
               <button className={styles.brainText} onClick={() => onEdit(idea)} title="Abrir ideia">
                 {idea.title}
-                {(idea.format || idea.pillar || idea.description) && (
+                {(idea.production_type || idea.format || idea.pillar || idea.description) && (
                   <span className={styles.brainMeta}>
-                    {[idea.format && formatLabel(idea.format), idea.pillar].filter(Boolean).join(' · ')}
+                    {[productionTypeLabel(idea.production_type), idea.format && formatLabel(idea.format), idea.pillar].filter(Boolean).join(' · ')}
                     {idea.description && <span className={styles.scriptTag}>📝 roteiro</span>}
                   </span>
                 )}

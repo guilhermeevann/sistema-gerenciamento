@@ -20,6 +20,7 @@ export default function Home() {
   const [weeklyWords, setWeeklyWords] = useState<any[]>([]);
   const [routineTasks, setRoutineTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nextMilestone, setNextMilestone] = useState<{ title: string; date: string } | null>(null);
 
   // Word Modal State
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
@@ -51,6 +52,15 @@ export default function Home() {
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: true }),
       fetchWords(),
+      // Próximo marco da linha do tempo; se a tabela ainda não existe, só não aparece.
+      supabase
+        .from('milestones')
+        .select('title,date')
+        .eq('done', false)
+        .gte('date', todayLocal())
+        .order('date', { ascending: true })
+        .limit(1)
+        .then(({ data }) => setNextMilestone(data?.[0] ?? null)),
     ]);
 
     if (goalsRes.error || tasksRes.error) showToast('Erro ao carregar o painel.', 'error');
@@ -165,6 +175,14 @@ export default function Home() {
         <p className={styles.dateLabel}>{todayLabel}</p>
         <h1 className="h2">Olá, Guilherme.</h1>
         <p className="text-secondary">O que vamos construir hoje?</p>
+        {nextMilestone && (() => {
+          const days = Math.round((new Date(nextMilestone.date + 'T12:00:00').getTime() - new Date(todayLocal() + 'T12:00:00').getTime()) / 86_400_000);
+          return (
+            <Link href="/marcos" className={styles.nextMilestone}>
+              ◆ Próximo marco: <strong>{nextMilestone.title}</strong> · {days === 0 ? 'hoje' : days === 1 ? 'amanhã' : `em ${days} dias`}
+            </Link>
+          );
+        })()}
       </header>
 
       {/* Palavras da Semana */}

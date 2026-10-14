@@ -148,6 +148,17 @@ export default function Home() {
     }
   };
 
+  // priority = 1 marca a tarefa como destaque do dia; 2 é o normal.
+  const togglePriority = async (task: any) => {
+    const priority = task.priority === 1 ? 2 : 1;
+    setRoutineTasks(prev => prev.map(t => t.id === task.id ? { ...t, priority } : t));
+    const { error } = await supabase.from('tasks').update({ priority }).eq('id', task.id);
+    if (error) {
+      setRoutineTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      showToast('Não foi possível salvar. Tente de novo.', 'error');
+    }
+  };
+
   const toggleGoal = async (goal: any) => {
     const newStatus = !goal.completed;
     setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
@@ -248,20 +259,33 @@ export default function Home() {
                   Nada programado para hoje. <Link href="/tarefas" className={styles.sectionLink}>Adicionar tarefa</Link>
                 </p>
               ) : (
-                routineTasks.map(task => {
+                // Destacadas primeiro, mantendo a ordem manual dentro de cada grupo.
+                [...routineTasks].sort((a, b) => Number(b.priority === 1) - Number(a.priority === 1)).map(task => {
                   const isCompletedToday = task.is_completed && task.date === todayStr;
+                  const starred = task.priority === 1;
                   return (
-                    <button
-                      key={task.id}
-                      type="button"
-                      role="checkbox"
-                      aria-checked={isCompletedToday}
-                      className={`${styles.checkItem} ${isCompletedToday ? styles.completed : ''}`}
-                      onClick={() => toggleTaskCompletion(task)}
-                    >
-                      <span className={styles.checkbox}>{isCompletedToday && <CheckMark />}</span>
-                      <span className={styles.checkText}>{task.title}</span>
-                    </button>
+                    <div key={task.id} className={`${styles.checkRow} ${starred ? styles.starredRow : ''}`}>
+                      <button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={isCompletedToday}
+                        className={`${styles.checkItem} ${isCompletedToday ? styles.completed : ''}`}
+                        onClick={() => toggleTaskCompletion(task)}
+                      >
+                        <span className={styles.checkbox}>{isCompletedToday && <CheckMark />}</span>
+                        <span className={styles.checkText}>{task.title}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.starBtn} ${starred ? styles.starOn : ''}`}
+                        onClick={() => togglePriority(task)}
+                        aria-pressed={starred}
+                        aria-label={starred ? `Tirar destaque de ${task.title}` : `Destacar ${task.title} como prioridade`}
+                        title={starred ? 'Tirar destaque' : 'Destacar como prioridade'}
+                      >
+                        {starred ? '★' : '☆'}
+                      </button>
+                    </div>
                   );
                 })
               )}

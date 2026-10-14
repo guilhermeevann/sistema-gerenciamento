@@ -356,3 +356,25 @@
     min-height: 0;
   }
 }
+
+/* Tarefa destacada como prioridade */
+.starredCard {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12);
+}
+
+.starredCard .taskTitle {
+  font-weight: 600;
+  color: #fde68a;
+}
+
+.starIcon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.starIcon:hover,
+.starIconOn {
+  color: #fbbf24;
+}

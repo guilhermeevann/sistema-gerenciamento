@@ -114,6 +114,17 @@ export default function Tarefas() {
     }
   };
 
+  // priority = 1 marca a tarefa como destaque (aparece em primeiro na Home); 2 é o normal.
+  const togglePriority = async (task: any) => {
+    const priority = task.priority === 1 ? 2 : 1;
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, priority } : t));
+    const { error } = await supabase.from('tasks').update({ priority }).eq('id', task.id);
+    if (error) {
+      setTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      showToast('Não foi possível salvar. Tente de novo.', 'error');
+    } else if (priority === 1) showToast('Tarefa destacada como prioridade ★');
+  };
+
   const handleEdit = (task: any) => {
     setTitle(task.title);
     setType(task.type);
@@ -272,7 +283,7 @@ export default function Tarefas() {
                         return (
                           <div
                             key={task.id}
-                            className={styles.taskCard}
+                            className={`${styles.taskCard} ${task.priority === 1 ? styles.starredCard : ''}`}
                             style={{ borderLeftColor: typeStyle.color }}
                           >
                             {/* Reorder controls */}
@@ -330,6 +341,15 @@ export default function Tarefas() {
                                 {typeStyle.label}
                               </span>
                               <div className={styles.taskActions}>
+                                <button
+                                  className={`${styles.iconBtn} ${styles.starIcon} ${task.priority === 1 ? styles.starIconOn : ''}`}
+                                  onClick={() => togglePriority(task)}
+                                  aria-pressed={task.priority === 1}
+                                  title={task.priority === 1 ? 'Tirar destaque' : 'Destacar como prioridade'}
+                                  aria-label={task.priority === 1 ? 'Tirar destaque' : 'Destacar como prioridade'}
+                                >
+                                  {task.priority === 1 ? '★' : '☆'}
+                                </button>
                                 <button className={styles.iconBtn} onClick={() => handleEdit(task)} title="Editar">
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

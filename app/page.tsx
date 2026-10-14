@@ -259,8 +259,8 @@ export default function Home() {
                   Nada programado para hoje. <Link href="/tarefas" className={styles.sectionLink}>Adicionar tarefa</Link>
                 </p>
               ) : (
-                // Destacadas primeiro, mantendo a ordem manual dentro de cada grupo.
-                [...routineTasks].sort((a, b) => Number(b.priority === 1) - Number(a.priority === 1)).map(task => {
+                // Destacadas ficam na posição delas: o destaque mostra a importância, não muda a ordem.
+                routineTasks.map(task => {
                   const isCompletedToday = task.is_completed && task.date === todayStr;
                   const starred = task.priority === 1;
                   return (

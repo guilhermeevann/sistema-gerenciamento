@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
 import styles from './ano.module.css';
@@ -29,8 +29,11 @@ export default function Ano() {
   const [loading, setLoading] = useState(true);
   const [missingTables, setMissingTables] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  // Ano da última busca pedida: respostas de um ano anterior que chegam atrasadas são descartadas.
+  const requestedYear = useRef(year);
 
   const fetchData = async (y = year) => {
+    requestedYear.current = y;
     const [p, g, r] = await Promise.all([
       supabase.from('year_plans').select('*').eq('year', y).maybeSingle(),
       supabase.from('year_goals').select('*').eq('year', y).order('sort_order', { ascending: true, nullsFirst: false }).order('created_at', { ascending: true }),
@@ -40,10 +43,12 @@ export default function Ano() {
     if (err && (err.code === 'PGRST205' || err.code === '42P01')) { setMissingTables(true); setLoading(false); return; }
     if (err) showToast('Erro ao carregar o planejamento.', 'error');
 
+    if (requestedYear.current !== y) return;
     const goalIds = (g.data ?? []).map(x => x.id);
     const m = goalIds.length
       ? await supabase.from('year_measures').select('*').in('goal_id', goalIds).order('created_at', { ascending: true })
       : { data: [], error: null };
+    if (requestedYear.current !== y) return;
     if (m.error) showToast('Erro ao carregar resultados-chave.', 'error');
 
     setPlan(p.data ?? null);
@@ -52,6 +57,12 @@ export default function Ano() {
     setMeasures(m.data ?? []);
     setLoading(false);
   };
+
+  // ?ano=2026 abre direto naquele ano (links da Home e da antiga página Metas).
+  useEffect(() => {
+    const fromUrl = Number(new URLSearchParams(window.location.search).get('ano'));
+    if (fromUrl >= 2000 && fromUrl <= 2100) setYear(fromUrl);
+  }, []);
 
   // Troca de ano recarrega tudo, para nenhuma aba mostrar dado do ano anterior.
   useEffect(() => { setLoading(true); fetchData(year); }, [year]); // eslint-disable-line react-hooks/exhaustive-deps

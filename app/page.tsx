@@ -8,6 +8,7 @@ import styles from './page.module.css';
 import Modal from '@/components/Modal';
 import { showToast } from '@/components/Toast';
 import { confirmAction } from '@/components/ConfirmDialog';
+import { YearGoal, YearMeasure, areaOf, goalProgress } from './ano/types';
 
 const CheckMark = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -16,7 +17,9 @@ const CheckMark = () => (
 );
 
 export default function Home() {
-  const [goals, setGoals] = useState<any[]>([]);
+  // Foco Principal = objetivos do ano corrente no planejamento anual (a antiga página Metas foi incorporada).
+  const [goals, setGoals] = useState<YearGoal[]>([]);
+  const [goalMeasures, setGoalMeasures] = useState<YearMeasure[]>([]);
   const [weeklyWords, setWeeklyWords] = useState<any[]>([]);
   const [routineTasks, setRoutineTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,11 +44,12 @@ export default function Home() {
   const fetchDashboardData = async () => {
     const [goalsRes, tasksRes] = await Promise.all([
       supabase
-        .from('goals')
+        .from('year_goals')
         .select('*')
-        .or('completed.is.null,completed.eq.false')
-        .order('focus_level', { ascending: false })
-        .limit(3),
+        .eq('year', new Date().getFullYear())
+        .neq('status', 'pausado')
+        .order('sort_order', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: true }),
       supabase
         .from('tasks')
         .select('*')
@@ -64,7 +68,15 @@ export default function Home() {
     ]);
 
     if (goalsRes.error || tasksRes.error) showToast('Erro ao carregar o painel.', 'error');
-    setGoals(goalsRes.data ?? []);
+    const yearGoals = (goalsRes.data ?? []) as YearGoal[];
+    // Em andamento primeiro; concluídos ficam no fim, apagados.
+    setGoals([...yearGoals].sort((a, b) => Number(a.status === 'concluido') - Number(b.status === 'concluido')));
+    if (yearGoals.length) {
+      const { data: measuresData } = await supabase.from('year_measures').select('*').in('goal_id', yearGoals.map(g => g.id));
+      setGoalMeasures(measuresData ?? []);
+    } else {
+      setGoalMeasures([]);
+    }
 
     const todayIndex = new Date().getDay();
     setRoutineTasks((tasksRes.data ?? []).filter(t =>
@@ -159,15 +171,15 @@ export default function Home() {
     }
   };
 
-  const toggleGoal = async (goal: any) => {
-    const newStatus = !goal.completed;
-    setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, completed: newStatus } : g));
-    const { error } = await supabase.from('goals').update({ completed: newStatus }).eq('id', goal.id);
+  const toggleGoal = async (goal: YearGoal) => {
+    const status = goal.status === 'concluido' ? 'ativo' : 'concluido';
+    setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, status } : g));
+    const { error } = await supabase.from('year_goals').update({ status }).eq('id', goal.id);
     if (error) {
       setGoals(prev => prev.map(g => g.id === goal.id ? goal : g));
       showToast('Não foi possível salvar. Tente de novo.', 'error');
-    } else if (newStatus) {
-      showToast('Meta concluída! 🎉');
+    } else if (status === 'concluido') {
+      showToast('Objetivo concluído! 🎉');
     }
   };
 
@@ -305,40 +317,52 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Metas de Foco */}
+        {/* Foco Principal: objetivos do ano corrente */}
         <section className={styles.goalsSection}>
           <div className={styles.sectionHeader}>
             <h2 className="h3">Foco Principal</h2>
-            <Link href="/metas" className={styles.sectionLink}>Ver metas →</Link>
+            <Link href={`/ano?ano=${new Date().getFullYear()}`} className={styles.sectionLink}>Ver {new Date().getFullYear()} →</Link>
           </div>
 
           <div className={styles.goalsList}>
             {goals.length === 0 ? (
               <p className="text-muted">
-                Nenhuma meta em andamento. <Link href="/metas" className={styles.sectionLink}>Criar meta</Link>
+                Nenhum objetivo para {new Date().getFullYear()}. <Link href={`/ano?ano=${new Date().getFullYear()}`} className={styles.sectionLink}>Planejar o ano</Link>
               </p>
             ) : (
-              goals.map(goal => (
-                <div key={goal.id} className={`${styles.goalCard} glass-panel ${goal.completed ? styles.goalCompleted : ''}`}>
-                  <div className={styles.goalHeader}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                      <button
-                        type="button"
-                        role="checkbox"
-                        aria-checked={!!goal.completed}
-                        aria-label={`Concluir meta ${goal.title}`}
-                        className={`${styles.checkbox} ${goal.completed ? styles.checkboxActive : ''}`}
-                        onClick={() => toggleGoal(goal)}
-                      >
-                        {goal.completed && <CheckMark />}
-                      </button>
-                      <h3 className={styles.goalTitle}>{goal.title}</h3>
+              goals.map(goal => {
+                const done = goal.status === 'concluido';
+                const area = areaOf(goal.area);
+                const progress = goalProgress(goal, goalMeasures);
+                return (
+                  <div key={goal.id} className={`${styles.goalCard} glass-panel ${done ? styles.goalCompleted : ''}`} style={{ borderLeft: `3px solid ${area.color}` }}>
+                    <div className={styles.goalHeader}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={done}
+                          aria-label={`Concluir objetivo ${goal.title}`}
+                          className={`${styles.checkbox} ${done ? styles.checkboxActive : ''}`}
+                          onClick={() => toggleGoal(goal)}
+                        >
+                          {done && <CheckMark />}
+                        </button>
+                        <h3 className={styles.goalTitle}>{goal.title}</h3>
+                      </div>
+                      {goal.quarter && <span className="badge badge-amber">T{goal.quarter}</span>}
                     </div>
-                    <span className="badge badge-amber">Foco {goal.focus_level}</span>
+                    <span className={styles.goalArea} style={{ color: area.color }}>{area.label}</span>
+                    {progress !== null && (
+                      <div className={styles.goalProgress}>
+                        <span className={styles.goalProgressBar}><span style={{ width: `${Math.round(progress * 100)}%`, background: area.color }} /></span>
+                        <span className={styles.goalProgressValue}>{Math.round(progress * 100)}%</span>
+                      </div>
+                    )}
+                    {goal.why && <p className={styles.goalDesc}>{goal.why}</p>}
                   </div>
-                  {goal.description && <p className={styles.goalDesc}>{goal.description}</p>}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </section>

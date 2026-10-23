@@ -1,0 +1,741 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.yearNav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.yearTitle {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #05f698, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.yearBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.yearBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.word {
+  color: var(--accent-success);
+}
+
+.overall {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.overallValue {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.overallLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.guideToggle {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  color: #60a5fa;
+}
+
+.guide {
+  padding: 18px 22px;
+}
+
+.guide ol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.guide strong {
+  color: var(--text-primary);
+}
+
+.setupBox {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.setupBox code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Abas */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tabActive {
+  color: var(--text-primary);
+  background: var(--bg-surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-color-hover);
+}
+
+.tabCount {
+  font-size: 0.72rem;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Blocos comuns */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.panel {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panelTitle {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.empty {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.emptyBig {
+  padding: 36px;
+  text-align: center;
+  border: 1px dashed var(--border-color);
+  border-radius: 16px;
+  color: var(--text-secondary);
+}
+
+.warning {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fde68a;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.done {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Visão */
+.visionLayout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.areaList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.areaRow {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+.areaBar,
+.progressBar,
+.measureBar {
+  display: block;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.areaBar span,
+.progressBar span,
+.measureBar span {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.areaMeta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Objetivos */
+.goalGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.goalCard {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-left: 4px solid;
+}
+
+.goalMuted {
+  opacity: 0.6;
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.goalHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.goalArea {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.goalTitle {
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.goalTitle:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.goalChips {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chip,
+.chipSmall {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.chipSmall {
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+}
+
+.statusSelect {
+  width: auto;
+  padding: 4px 28px 4px 10px;
+  font-size: 0.76rem;
+  border-radius: 9999px;
+  background-position: right 10px top 50%;
+}
+
+.status_ativo { color: #60a5fa; }
+.status_concluido { color: #05f698; }
+.status_pausado { color: var(--text-muted); }
+
+.why {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.why span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progressRow .progressBar {
+  flex: 1;
+  height: 10px;
+}
+
+.progressValue {
+  font-weight: 700;
+  font-size: 0.9rem;
+  min-width: 40px;
+  text-align: right;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.blockHeader h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.blockHeader small {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+.addLink {
+  font-size: 0.8rem;
+  color: #60a5fa;
+  white-space: nowrap;
+}
+
+.addLink:hover {
+  text-decoration: underline;
+}
+
+.measure {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.measureTitle {
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.measureTitle:hover {
+  color: #fff;
+}
+
+.measureNumbers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.currentInput {
+  width: 84px;
+  padding: 4px 8px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.target {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.measurePct {
+  min-width: 36px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.measureBar {
+  grid-column: 1 / -1;
+  height: 5px;
+}
+
+.lever {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.18);
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.lever:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.frequency {
+  font-size: 0.76rem;
+  color: var(--accent-success);
+  white-space: nowrap;
+}
+
+.woop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.07);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.woop span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.goalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Trimestres */
+.quarterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.quarter {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quarterNow {
+  border-color: rgba(5, 246, 152, 0.45);
+  box-shadow: 0 0 0 1px rgba(5, 246, 152, 0.15);
+}
+
+.quarterHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quarterName {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.quarterDates {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.nowBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(5, 246, 152, 0.15);
+  color: var(--accent-success);
+}
+
+.quarterBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quarterBlock h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.quarterItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--border-color);
+  border-radius: 0 6px 6px 0;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 0.84rem;
+}
+
+.quarterMeta {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.quarterReview {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8rem;
+}
+
+/* Revisões */
+.rhythm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.rhythm strong {
+  color: var(--text-primary);
+}
+
+.quarterTabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.quarterTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  font-weight: 700;
+}
+
+.quarterTab small {
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.quarterTabActive {
+  border-color: rgba(5, 246, 152, 0.5);
+  background: rgba(5, 246, 152, 0.08);
+}
+
+.scoreRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.scoreBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.scoreBtn:hover {
+  color: var(--text-primary);
+}
+
+.scoreActive {
+  background: var(--accent-success);
+  border-color: var(--accent-success);
+  color: var(--bg-color);
+}
+
+/* Formulários */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.formRow3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.formActions {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .visionLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .overall {
+    align-items: flex-start;
+  }
+
+  .areaRow {
+    grid-template-columns: 1fr auto;
+  }
+
+  .areaRow .areaBar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .goalHeader {
+    flex-direction: column;
+  }
+
+  .quarterTabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formRow,
+  .formRow3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .measure {
+    grid-template-columns: 1fr;
+  }
+
+  .measureNumbers {
+    justify-content: flex-start;
+  }
+}

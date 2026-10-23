@@ -169,3 +169,26 @@
     width: auto;
   }
 }
+
+/* Mobile com muitos itens: só ícones; o item ativo mostra o nome */
+@media (max-width: 768px) {
+  .navLabel,
+  .sidebar.collapsed .navLabel {
+    display: none;
+  }
+
+  .navItem.active .navLabel {
+    display: block;
+    max-width: 100%;
+    font-size: 0.62rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .navItem,
+  .sidebar.collapsed .navItem {
+    min-height: 48px;
+    padding: 8px 0;
+  }
+}

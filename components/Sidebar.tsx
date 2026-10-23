@@ -50,6 +50,18 @@ const navItems = [
     )
   },
   {
+    // Rótulo vira o ano em planejamento (a partir de outubro, o ano seguinte).
+    name: String(new Date().getMonth() >= 9 ? new Date().getFullYear() + 1 : new Date().getFullYear()),
+    path: '/ano',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+        <path d="M12 2v2"></path>
+      </svg>
+    )
+  },
+  {
     name: 'Marcos',
     path: '/marcos',
     icon: (
@@ -119,6 +131,7 @@ export default function Sidebar() {
               href={item.path}
               className={`${styles.navItem} ${isActive ? styles.active : ''}`}
               title={collapsed ? item.name : ''}
+              aria-label={item.name}
               aria-current={isActive ? 'page' : undefined}
             >
               <span className={styles.navIcon}>{item.icon}</span>

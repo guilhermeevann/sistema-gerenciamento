@@ -23,10 +23,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.1;
-  background: linear-gradient(90deg, #05f698, #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent-text);
 }
 
 .yearBtn {
@@ -40,11 +37,11 @@
 
 .yearBtn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
 .word {
-  color: var(--accent-success);
+  color: var(--accent-text);
 }
 
 .overall {
@@ -68,7 +65,7 @@
 .guideToggle {
   align-self: flex-start;
   font-size: 0.85rem;
-  color: #60a5fa;
+  color: var(--accent-text);
 }
 
 .guide {
@@ -94,11 +91,11 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: color-mix(in srgb, var(--c-amber) 30%, transparent);
 }
 
 .setupBox code {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-sunken);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -109,7 +106,7 @@
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-sunken);
   border: 1px solid var(--border-color);
   overflow-x: auto;
 }
@@ -131,16 +128,17 @@
 }
 
 .tabActive {
-  color: var(--text-primary);
-  background: var(--bg-surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-color-hover);
+  color: var(--accent-text);
+  background: var(--bg-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border-color);
 }
 
 .tabCount {
   font-size: 0.72rem;
   padding: 1px 7px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
 /* Blocos comuns */
@@ -198,9 +196,9 @@
   padding: 12px 16px;
   border-radius: 10px;
   font-size: 0.88rem;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fde68a;
+  background: color-mix(in srgb, var(--c-amber) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-amber) 30%, transparent);
+  color: var(--c-amber);
 }
 
 .muted {
@@ -240,7 +238,7 @@
   display: block;
   height: 8px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   overflow: hidden;
 }
 
@@ -326,7 +324,7 @@
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--fg) 7%, transparent);
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -345,8 +343,8 @@
   background-position: right 10px top 50%;
 }
 
-.status_ativo { color: #60a5fa; }
-.status_concluido { color: #05f698; }
+.status_ativo { color: var(--accent-text); }
+.status_concluido { color: var(--accent-text); }
 .status_pausado { color: var(--text-muted); }
 
 .why {
@@ -407,7 +405,7 @@
 
 .addLink {
   font-size: 0.8rem;
-  color: #60a5fa;
+  color: var(--accent-text);
   white-space: nowrap;
 }
 
@@ -428,7 +426,7 @@
 }
 
 .measureTitle:hover {
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .measureNumbers {
@@ -468,18 +466,18 @@
   gap: 10px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--bg-sunken);
   text-align: left;
   font-size: 0.86rem;
 }
 
 .lever:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
 .frequency {
   font-size: 0.76rem;
-  color: var(--accent-success);
+  color: var(--accent-text);
   white-space: nowrap;
 }
 
@@ -489,8 +487,8 @@
   gap: 6px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(139, 92, 246, 0.07);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: color-mix(in srgb, var(--c-violet) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-violet) 20%, transparent);
   font-size: 0.84rem;
   color: var(--text-secondary);
 }
@@ -522,8 +520,8 @@
 }
 
 .quarterNow {
-  border-color: rgba(5, 246, 152, 0.45);
-  box-shadow: 0 0 0 1px rgba(5, 246, 152, 0.15);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .quarterHeader {
@@ -549,8 +547,8 @@
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: 9999px;
-  background: rgba(5, 246, 152, 0.15);
-  color: var(--accent-success);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent-text);
 }
 
 .quarterBlock {
@@ -572,7 +570,7 @@
   padding: 6px 10px;
   border-left: 3px solid var(--border-color);
   border-radius: 0 6px 6px 0;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--bg-sunken);
   font-size: 0.84rem;
 }
 
@@ -627,8 +625,8 @@
 }
 
 .quarterTabActive {
-  border-color: rgba(5, 246, 152, 0.5);
-  background: rgba(5, 246, 152, 0.08);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .scoreRow {
@@ -651,9 +649,9 @@
 }
 
 .scoreActive {
-  background: var(--accent-success);
-  border-color: var(--accent-success);
-  color: var(--bg-color);
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--on-accent);
 }
 
 /* Formulários */

@@ -111,7 +111,7 @@
 }
 
 .iconBtn {
-  background: rgba(255,255,255,0.05);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
   border-radius: 6px;
   padding: 7px;
   display: flex;
@@ -124,15 +124,15 @@
 }
 
 .iconBtn:hover {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
   color: var(--text-primary);
   border-color: var(--border-color-hover);
 }
 
 .deleteIconBtn:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: color-mix(in srgb, var(--c-red) 12%, transparent);
   color: var(--accent-danger);
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: color-mix(in srgb, var(--c-red) 20%, transparent);
 }
 
 .progressContainer {
@@ -143,14 +143,14 @@
 
 .progressBar {
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-primary), var(--accent-success));
+  background: var(--accent);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -185,9 +185,9 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-sunken);
   border-radius: 8px;
-  border-left: 2px solid rgba(5, 246, 152, 0.4);
+  border-left: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .sessionHeader {
@@ -198,7 +198,7 @@
 
 .sessionDate {
   font-size: 0.78rem;
-  color: var(--accent-success);
+  color: var(--accent-text);
   font-weight: 600;
   text-transform: capitalize;
 }
@@ -220,7 +220,7 @@
 .expandBtn {
   background: none;
   border: none;
-  color: var(--accent-success);
+  color: var(--accent-text);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -234,7 +234,7 @@
 
 .sessionLink {
   font-size: 0.8rem;
-  color: var(--accent-primary);
+  color: var(--accent-text);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -249,10 +249,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--fg) 2%, transparent);
   padding: 14px;
   border-radius: 10px;
-  border: 1px dashed rgba(5, 246, 152, 0.2);
+  border: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .sessionFormRow {
@@ -267,7 +267,7 @@
   gap: 8px;
   width: 100%;
   padding: 9px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
   border: 1px dashed var(--border-color);
   border-radius: 8px;
   color: var(--text-muted);
@@ -278,9 +278,9 @@
 }
 
 .addSessionBtn:hover {
-  background: rgba(5, 246, 152, 0.06);
-  border-color: rgba(5, 246, 152, 0.25);
-  color: var(--accent-success);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent-text);
 }
 
 /* Empty States */
@@ -304,7 +304,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid var(--border-color);
-  border-top-color: var(--accent-success);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

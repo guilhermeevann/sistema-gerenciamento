@@ -12,11 +12,11 @@ export interface Milestone {
 }
 
 export const kinds: { value: MilestoneKind; label: string; color: string }[] = [
-  { value: 'trabalho', label: '💼 Trabalho', color: '#05f698' },
-  { value: 'pessoal', label: '🙋 Pessoal', color: '#60a5fa' },
-  { value: 'mudanca', label: '📦 Mudança', color: '#fbbf24' },
-  { value: 'viagem', label: '✈️ Viagem', color: '#f472b6' },
-  { value: 'data', label: '🎉 Data especial', color: '#a78bfa' },
+  { value: 'trabalho', label: '💼 Trabalho', color: 'var(--c-green)' },
+  { value: 'pessoal', label: '🙋 Pessoal', color: 'var(--c-blue)' },
+  { value: 'mudanca', label: '📦 Mudança', color: 'var(--c-amber)' },
+  { value: 'viagem', label: '✈️ Viagem', color: 'var(--c-pink)' },
+  { value: 'data', label: '🎉 Data especial', color: 'var(--c-violet)' },
 ];
 
 export const kindOf = (value: string) => kinds.find(k => k.value === value) ?? kinds[1];

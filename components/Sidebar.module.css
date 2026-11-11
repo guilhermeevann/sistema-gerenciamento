@@ -1,101 +1,111 @@
+/* Painel lateral no estilo Obsidian: encostado na borda, plano, um tom acima do fundo. */
 .sidebar {
-  width: 280px;
-  height: calc(100vh - 40px);
-  margin: 20px;
-  padding: 32px 24px;
+  width: 248px;
+  height: 100vh;
+  padding: 20px 14px 16px;
   display: flex;
   flex-direction: column;
   position: sticky;
-  top: 20px;
+  top: 0;
   flex-shrink: 0;
-  transition: width 0.3s ease, padding 0.3s ease;
   overflow: hidden;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  transition: width 0.25s ease, padding 0.25s ease;
 }
 
 .sidebar.collapsed {
-  width: 72px;
-  padding: 32px 12px;
+  width: 68px;
+  padding: 20px 10px 16px;
 }
 
-/* Toggle Button */
 .toggleBtn {
   position: absolute;
-  top: 16px;
+  top: 20px;
   right: 12px;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.04);
   color: var(--text-muted);
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   z-index: 10;
 }
 
+.sidebar.collapsed .toggleBtn {
+  position: static;
+  margin: 0 auto 12px;
+}
+
 .toggleBtn:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   color: var(--text-primary);
-  border-color: var(--border-color-hover);
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 48px;
+  gap: 10px;
+  margin: 2px 4px 28px;
   white-space: nowrap;
   overflow: hidden;
 }
 
+.logo :global(.h3) {
+  font-size: 1.1rem;
+}
+
 .logoIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-success), var(--accent-primary));
-  box-shadow: 0 4px 12px rgba(5, 246, 152, 0.3);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent-solid);
   flex-shrink: 0;
+}
+
+.sidebar.collapsed .logo {
+  justify-content: center;
+  margin: 0 0 20px;
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   flex: 1;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 10px;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
   color: var(--text-secondary);
   font-weight: 500;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  font-size: 0.93rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
   overflow: hidden;
 }
 
-/* When collapsed, center the icon */
 .sidebar.collapsed .navItem {
-  padding: 12px;
+  padding: 8px;
   justify-content: center;
 }
 
 .navItem:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--fg) 7%, transparent);
   color: var(--text-primary);
 }
 
 .navItem.active {
-  background: rgba(5, 246, 152, 0.08);
-  color: var(--accent-success);
-  border-color: rgba(5, 246, 152, 0.2);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
 }
 
 .navIcon {
@@ -118,11 +128,24 @@
 
 .footer {
   margin-top: auto;
-  padding-top: 24px;
+  padding-top: 14px;
   border-top: 1px solid var(--border-color);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.motto {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Botão de tema no canto: só aparece no celular */
+.mobileTheme {
+  display: none;
 }
 
 /* Mobile: barra de navegação inferior */
@@ -138,9 +161,11 @@
     height: auto;
     margin: 0;
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    border-radius: 16px 16px 0 0;
+    border-radius: 0;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
     z-index: 900;
-    background: rgba(11, 15, 25, 0.92);
+    background: var(--bg-sidebar);
   }
 
   .toggleBtn,
@@ -190,5 +215,15 @@
   .sidebar.collapsed .navItem {
     min-height: 48px;
     padding: 8px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobileTheme {
+    display: block;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 950;
   }
 }

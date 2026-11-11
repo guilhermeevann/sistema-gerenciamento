@@ -38,33 +38,33 @@
 }
 
 .success {
-  background: rgba(5, 246, 152, 0.12);
-  border-color: rgba(5, 246, 152, 0.25);
-  color: #05f698;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent-text);
 }
 
 .success .icon {
-  background: rgba(5, 246, 152, 0.2);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .error {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.25);
-  color: #f87171;
+  background: color-mix(in srgb, var(--c-red) 12%, transparent);
+  border-color: color-mix(in srgb, var(--c-red) 25%, transparent);
+  color: var(--c-red);
 }
 
 .error .icon {
-  background: rgba(239, 68, 68, 0.2);
+  background: color-mix(in srgb, var(--c-red) 20%, transparent);
 }
 
 .info {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.25);
-  color: #60a5fa;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent-text);
 }
 
 .info .icon {
-  background: rgba(59, 130, 246, 0.2);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 @keyframes slideIn {
@@ -83,4 +83,8 @@
     right: 16px;
     bottom: 88px;
   }
+}
+
+.toast.error {
+  animation: slideIn 0.3s ease, fadeOut 0.4s ease 5.6s forwards;
 }

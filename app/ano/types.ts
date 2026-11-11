@@ -47,12 +47,12 @@ export interface YearReview {
 }
 
 export const areas: { value: Area; label: string; color: string }[] = [
-  { value: 'espiritual', label: '🙏 Espiritual', color: '#a78bfa' },
-  { value: 'familia', label: '🏡 Família', color: '#f472b6' },
-  { value: 'saude', label: '💪 Saúde', color: '#05f698' },
-  { value: 'financas', label: '💰 Finanças', color: '#fbbf24' },
-  { value: 'negocio', label: '🚀 Negócio', color: '#60a5fa' },
-  { value: 'desenvolvimento', label: '📚 Desenvolvimento', color: '#22d3ee' },
+  { value: 'espiritual', label: '🙏 Espiritual', color: 'var(--c-violet)' },
+  { value: 'familia', label: '🏡 Família', color: 'var(--c-pink)' },
+  { value: 'saude', label: '💪 Saúde', color: 'var(--c-green)' },
+  { value: 'financas', label: '💰 Finanças', color: 'var(--c-amber)' },
+  { value: 'negocio', label: '🚀 Negócio', color: 'var(--c-blue)' },
+  { value: 'desenvolvimento', label: '📚 Desenvolvimento', color: 'var(--c-cyan)' },
 ];
 
 export const areaOf = (value: string) => areas.find(a => a.value === value) ?? areas[4];

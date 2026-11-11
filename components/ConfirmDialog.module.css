@@ -28,11 +28,12 @@
 }
 
 .dangerSolid {
-  background: var(--accent-danger);
-  color: #fff;
+  /* Vermelho fixo: texto branco legível nos dois temas */
+  background: #dc2626;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .dangerSolid:hover:not(:disabled) {
-  background: #dc2626;
+  background: #b91c1c;
 }

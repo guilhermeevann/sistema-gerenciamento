@@ -23,7 +23,7 @@
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-sunken);
   border: 1px solid var(--border-color);
   overflow-x: auto;
 }
@@ -43,20 +43,21 @@
 
 .tab:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
 }
 
 .tabActive {
-  color: var(--text-primary);
-  background: var(--bg-surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-color-hover);
+  color: var(--accent-text);
+  background: var(--bg-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border-color);
 }
 
 .tabCount {
   font-size: 0.72rem;
   padding: 1px 7px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   color: var(--text-secondary);
 }
 
@@ -151,7 +152,7 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-sunken);
   border: 1px solid var(--border-color);
   font-size: 0.9rem;
 }
@@ -178,7 +179,7 @@
 }
 
 .cardMain {
-  border-color: rgba(5, 246, 152, 0.25);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .cardHeader {
@@ -222,7 +223,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  color: #60a5fa;
+  color: var(--accent-text);
   word-break: break-all;
 }
 
@@ -248,12 +249,12 @@
 }
 
 .iconBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   color: var(--text-primary);
 }
 
 .deleteIconBtn:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: color-mix(in srgb, var(--c-red) 12%, transparent);
   color: var(--accent-danger);
 }
 
@@ -314,7 +315,7 @@
   gap: 12px;
   padding: 14px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-sunken);
   border: 1px solid var(--border-color);
 }
 
@@ -364,7 +365,7 @@
   flex-direction: column;
   padding: 8px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--bg-sunken);
 }
 
 .metricValue {
@@ -384,8 +385,8 @@
   color: var(--text-secondary);
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(5, 246, 152, 0.05);
-  border: 1px solid rgba(5, 246, 152, 0.12);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
   white-space: pre-wrap;
 }
 
@@ -458,7 +459,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid var(--border-color);
-  border-top-color: var(--accent-success);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -472,11 +473,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: color-mix(in srgb, var(--c-amber) 30%, transparent);
 }
 
 .setupBox code {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-sunken);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -504,7 +505,7 @@
 }
 
 .brainText:hover {
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .brainMeta {
@@ -519,8 +520,8 @@
   font-size: 0.7rem;
   padding: 1px 7px;
   border-radius: 9999px;
-  background: rgba(139, 92, 246, 0.12);
-  color: #a78bfa;
+  background: color-mix(in srgb, var(--c-violet) 12%, transparent);
+  color: var(--c-violet);
 }
 
 @media (max-width: 640px) {
@@ -553,8 +554,8 @@
 }
 
 .cardUrgent {
-  border-color: rgba(245, 158, 11, 0.35);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.1), var(--glass-shadow);
+  border-color: color-mix(in srgb, var(--c-amber) 35%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-amber) 10%, transparent), var(--glass-shadow);
 }
 
 .reorder {
@@ -566,7 +567,7 @@
 
 .reorder .iconBtn {
   width: 28px;
-  height: 20px;
+  height: 24px;
   font-size: 0.72rem;
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
@@ -590,7 +591,7 @@
 }
 
 .cardTitleBtn:hover {
-  color: #fff;
+  color: var(--text-strong);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -608,7 +609,7 @@
   padding: 3px;
   gap: 2px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--bg-sunken);
   border: 1px solid var(--border-color);
 }
 
@@ -625,9 +626,9 @@
   color: var(--text-primary);
 }
 
-.priority1 { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
-.priority2 { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
-.priority3 { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); }
+.priority1 { background: color-mix(in srgb, var(--c-amber) 18%, transparent); color: var(--c-amber); }
+.priority2 { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent-text); }
+.priority3 { background: color-mix(in srgb, var(--text-muted) 15%, transparent); color: var(--text-secondary); }
 
 .hookText {
   flex: 1;
@@ -639,14 +640,14 @@
 }
 
 .readBtn {
-  background: rgba(139, 92, 246, 0.14);
-  color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: color-mix(in srgb, var(--c-violet) 14%, transparent);
+  color: var(--c-violet);
+  border: 1px solid color-mix(in srgb, var(--c-violet) 35%, transparent);
 }
 
 .readBtn:hover {
-  background: rgba(139, 92, 246, 0.24);
-  color: #fff;
+  background: color-mix(in srgb, var(--c-violet) 24%, transparent);
+  color: var(--text-strong);
 }
 
 /* Tipo de produção */
@@ -666,7 +667,7 @@
   font-weight: 500;
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-sunken);
   transition: all 0.15s ease;
 }
 
@@ -676,19 +677,20 @@
 }
 
 .typeTabActive {
-  color: var(--text-primary);
-  background: var(--bg-surface-hover);
-  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-strong);
+  background: var(--bg-surface);
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
-.typeRapidoTab.typeTabActive { border-color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
-.typeFundoTab.typeTabActive { border-color: #a78bfa; background: rgba(139, 92, 246, 0.14); }
-.typeRoteiroTab.typeTabActive { border-color: #f472b6; background: rgba(236, 72, 153, 0.12); }
+.typeRapidoTab.typeTabActive { border-color: var(--c-cyan); background: color-mix(in srgb, var(--c-cyan) 12%, transparent); }
+.typeFundoTab.typeTabActive { border-color: var(--c-violet); background: color-mix(in srgb, var(--c-violet) 14%, transparent); }
+.typeRoteiroTab.typeTabActive { border-color: var(--c-pink); background: color-mix(in srgb, var(--c-pink) 12%, transparent); }
 
 /* Faixa colorida à esquerda do card */
-.typeRapido { border-left: 4px solid #38bdf8; }
-.typeFundo { border-left: 4px solid #a78bfa; }
-.typeRoteiro { border-left: 4px solid #f472b6; }
+.typeRapido { border-left: 4px solid var(--c-cyan); }
+.typeFundo { border-left: 4px solid var(--c-violet); }
+.typeRoteiro { border-left: 4px solid var(--c-pink); }
 
 .typeBadge {
   display: inline-flex;
@@ -699,9 +701,9 @@
   font-weight: 700;
 }
 
-.typeRapidoBadge { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
-.typeFundoBadge { background: rgba(139, 92, 246, 0.14); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
-.typeRoteiroBadge { background: rgba(236, 72, 153, 0.14); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.3); }
+.typeRapidoBadge { background: color-mix(in srgb, var(--c-cyan) 14%, transparent); color: var(--c-cyan); border: 1px solid color-mix(in srgb, var(--c-cyan) 30%, transparent); }
+.typeFundoBadge { background: color-mix(in srgb, var(--c-violet) 14%, transparent); color: var(--c-violet); border: 1px solid color-mix(in srgb, var(--c-violet) 30%, transparent); }
+.typeRoteiroBadge { background: color-mix(in srgb, var(--c-pink) 14%, transparent); color: var(--c-pink); border: 1px solid color-mix(in srgb, var(--c-pink) 30%, transparent); }
 
 .classify {
   display: flex;
@@ -724,10 +726,19 @@
 .classifyBtn:hover:not(:disabled) {
   color: var(--text-primary);
   border-style: solid;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
 /* Quarto tipo: carrossel / estático */
-.typeEstatico { border-left: 4px solid #fbbf24; }
-.typeEstaticoBadge { background: rgba(245, 158, 11, 0.14); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
-.typeEstaticoTab.typeTabActive { border-color: #fbbf24; background: rgba(245, 158, 11, 0.12); }
+.typeEstatico { border-left: 4px solid var(--c-amber); }
+.typeEstaticoBadge { background: color-mix(in srgb, var(--c-amber) 14%, transparent); color: var(--c-amber); border: 1px solid color-mix(in srgb, var(--c-amber) 30%, transparent); }
+.typeEstaticoTab.typeTabActive { border-color: var(--c-amber); background: color-mix(in srgb, var(--c-amber) 12%, transparent); }
+
+/* Alvos de toque com no mínimo 24px (WCAG 2.2, 2.5.8) */
+.priorityOption {
+  min-height: 26px;
+}
+
+.cardTitleBtn {
+  min-height: 24px;
+}

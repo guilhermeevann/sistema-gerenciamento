@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import styles from './Sidebar.module.css';
+import ThemeToggle from './ThemeToggle';
 
 const navItems = [
   { 
@@ -89,7 +90,7 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} glass-panel`}>
+    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
       {/* Toggle Button */}
       <button
         className={styles.toggleBtn}
@@ -130,11 +131,15 @@ export default function Sidebar() {
         })}
       </nav>
       
-      {!collapsed && (
-        <div className={styles.footer}>
-          <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Deus no controle.</p>
-        </div>
-      )}
+      <div className={styles.footer}>
+        {collapsed ? <ThemeToggle compact /> : <ThemeToggle />}
+        {!collapsed && <p className={styles.motto}>Deus no controle.</p>}
+      </div>
+
+      {/* No celular o rodapé some (barra inferior); o tema fica num botão no canto. */}
+      <div className={styles.mobileTheme}>
+        <ThemeToggle compact />
+      </div>
     </aside>
   );
 }

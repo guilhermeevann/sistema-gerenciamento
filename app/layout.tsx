@@ -8,13 +8,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Rotina",
-  description: "Gerenciamento pessoal de rotina, estudos e metas.",
+  // Cada seção define o próprio título (layout.tsx da pasta); a aba mostra "Seção · Rotina".
+  title: { default: "Rotina", template: "%s · Rotina" },
+  description: "Gerenciamento pessoal de rotina, estudos, planejamento do ano e conteúdo.",
 };
 
 import Sidebar from "@/components/Sidebar";
 import ToastContainer from "@/components/Toast";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { themeScript } from "@/lib/theme";
 
 export default function RootLayout({
   children,
@@ -22,11 +24,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={inter.variable}>
+    // data-theme é corrigido pelo script inline antes da pintura; por isso suppressHydrationWarning.
+    <html lang="pt-BR" className={inter.variable} data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
+        <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
         <div className="app-container">
           <Sidebar />
-          <main className="main-content">
+          <main id="conteudo" className="main-content" tabIndex={-1}>
             {children}
           </main>
         </div>

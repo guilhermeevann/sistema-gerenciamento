@@ -1,0 +1,41 @@
+.group {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-color);
+}
+
+.option,
+.single {
+  width: 32px;
+  height: 30px;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.option:hover,
+.single:hover {
+  color: var(--text-primary);
+}
+
+.active {
+  background: var(--bg-surface);
+  color: var(--accent-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.single {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}

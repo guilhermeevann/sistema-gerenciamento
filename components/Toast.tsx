@@ -25,7 +25,8 @@ export default function ToastContainer() {
     toastCallback = (message, type) => {
       const id = String(++toastSeq);
       setToasts(prev => [...prev, { id, message, type }]);
-      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+      // Erro fica mais tempo na tela: dá para ler o que deu errado antes de sumir.
+      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), type === 'error' ? 6000 : 3000);
     };
     return () => { toastCallback = null; };
   }, []);

@@ -202,9 +202,9 @@ export default function Tarefas() {
   };
 
   const getTypeStyle = (task: any) => {
-    if (task.type === 'recurring') return { label: 'Diário',  color: 'var(--accent-primary)' };
-    if (task.type === 'weekly')    return { label: 'Semanal', color: 'var(--accent-success)' };
-    return                                { label: 'Avulso',  color: 'var(--accent-purple)'  };
+    if (task.type === 'recurring') return { label: 'Diário',  color: 'var(--c-blue)' };
+    if (task.type === 'weekly')    return { label: 'Semanal', color: 'var(--c-green)' };
+    return                                { label: 'Avulso',  color: 'var(--c-violet)'  };
   };
 
   return (
@@ -234,9 +234,9 @@ export default function Tarefas() {
 
       {/* Legend */}
       <div className={styles.legend}>
-        <span className={styles.legendItem}><span style={{ background: 'var(--accent-primary)' }} className={styles.legendDot}></span>Rotina Diária</span>
-        <span className={styles.legendItem}><span style={{ background: 'var(--accent-success)' }} className={styles.legendDot}></span>Fixo Semanal</span>
-        <span className={styles.legendItem}><span style={{ background: 'var(--accent-purple)' }} className={styles.legendDot}></span>Avulso</span>
+        <span className={styles.legendItem}><span style={{ background: 'var(--c-blue)' }} className={styles.legendDot}></span>Rotina Diária</span>
+        <span className={styles.legendItem}><span style={{ background: 'var(--c-green)' }} className={styles.legendDot}></span>Fixo Semanal</span>
+        <span className={styles.legendItem}><span style={{ background: 'var(--c-violet)' }} className={styles.legendDot}></span>Avulso</span>
       </div>
 
       <div className={styles.content}>
@@ -418,7 +418,7 @@ export default function Tarefas() {
                 ))}
               </div>
               {selectedDays.length > 0 && (
-                <p style={{ fontSize: '0.8rem', color: 'var(--accent-success)', marginTop: '4px' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--accent-text)', marginTop: '4px' }}>
                   ✓ {selectedDays.sort().map(d => daysOfWeek[d]).join(', ')}
                 </p>
               )}

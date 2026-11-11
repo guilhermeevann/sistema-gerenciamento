@@ -52,14 +52,14 @@
 .weekBoard::-webkit-scrollbar { height: 6px; }
 .weekBoard::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
 .weekBoard::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-.weekBoard::-webkit-scrollbar-thumb:hover { background: var(--accent-success); }
+.weekBoard::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 .dayColumn {
   display: flex;
   flex-direction: column;
   gap: 10px;
   background: var(--bg-surface);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
   border-radius: 14px;
   padding: 16px;
   min-width: 180px;
@@ -67,15 +67,15 @@
 }
 
 .dayColumn.today {
-  border: 1.5px solid var(--accent-success);
-  background: rgba(5, 246, 152, 0.04);
-  box-shadow: 0 0 20px rgba(5, 246, 152, 0.06);
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
 .dayHeader {
   font-weight: 600;
   color: var(--text-muted);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
   padding-bottom: 10px;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -94,13 +94,13 @@
 }
 
 .dayColumn.today .dayHeader {
-  color: var(--accent-success);
-  border-bottom-color: rgba(5, 246, 152, 0.2);
+  color: var(--accent-text);
+  border-bottom-color: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .todayBadge {
-  background: rgba(5, 246, 152, 0.15);
-  color: var(--accent-success);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent-text);
   font-size: 0.65rem;
   padding: 2px 8px;
   border-radius: 999px;
@@ -116,8 +116,8 @@
 
 .taskCard {
   padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-sunken);
+  border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
   border-left: 3px solid var(--accent-primary);
   border-radius: 8px;
   display: flex;
@@ -127,7 +127,7 @@
 }
 
 .taskCard:hover {
-  border-color: rgba(255,255,255,0.12);
+  border-color: color-mix(in srgb, var(--fg) 12%, transparent);
   border-left-width: 3px;
   transform: translateY(-1px);
 }
@@ -140,11 +140,11 @@
 }
 
 .reorderBtn {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 5px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   color: var(--text-muted);
   cursor: pointer;
   display: flex;
@@ -155,9 +155,9 @@
 }
 
 .reorderBtn:hover:not(:disabled) {
-  background: rgba(5, 246, 152, 0.12);
-  border-color: rgba(5, 246, 152, 0.3);
-  color: var(--accent-success);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent-text);
 }
 
 .reorderBtn:disabled {
@@ -206,12 +206,12 @@
 }
 
 .iconBtn:hover {
-  background: rgba(255,255,255,0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   color: var(--text-primary);
 }
 
 .deleteIcon:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: color-mix(in srgb, var(--c-red) 12%, transparent);
   color: var(--accent-danger);
 }
 
@@ -259,7 +259,7 @@
   border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 600;
-  background: rgba(255,255,255,0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   cursor: pointer;
@@ -267,14 +267,14 @@
 }
 
 .dayPickerBtn:hover {
-  background: rgba(255,255,255,0.08);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
   color: var(--text-primary);
 }
 
 .dayPickerActive {
-  background: rgba(5, 246, 152, 0.12) !important;
-  border-color: rgba(5, 246, 152, 0.4) !important;
-  color: var(--accent-success) !important;
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent) !important;
+  color: var(--accent-text) !important;
 }
 
 /* Empty + Loading States */
@@ -299,7 +299,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid var(--border-color);
-  border-top-color: var(--accent-success);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -321,8 +321,8 @@
 }
 
 .dayAddBtn {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 6px;
   font-size: 1rem;
   line-height: 1;
@@ -336,9 +336,9 @@
 }
 
 .dayAddBtn:hover {
-  color: var(--accent-success);
-  border-color: rgba(5, 246, 152, 0.4);
-  background: rgba(5, 246, 152, 0.08);
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 @media (max-width: 768px) {
@@ -359,14 +359,14 @@
 
 /* Tarefa destacada como prioridade */
 .starredCard {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.35);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12);
+  background: color-mix(in srgb, var(--c-amber) 8%, transparent);
+  border-color: color-mix(in srgb, var(--c-amber) 35%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-amber) 12%, transparent);
 }
 
 .starredCard .taskTitle {
   font-weight: 600;
-  color: #fde68a;
+  color: var(--c-amber);
 }
 
 .starIcon {
@@ -376,5 +376,14 @@
 
 .starIcon:hover,
 .starIconOn {
-  color: #fbbf24;
+  color: var(--c-amber);
+}
+
+/* Alvos de toque com no mínimo 24px (WCAG 2.2, 2.5.8) */
+.taskActions .iconBtn {
+  min-width: 26px;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

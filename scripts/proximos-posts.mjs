@@ -1,73 +1,51 @@
-// Lista os próximos posts do planejamento do Instagram, na ordem de prioridade do Banco de ideias.
+// Lista a esteira de Conteúdo (tabela cnt_pecas): o que está para editar, para gravar e para postar.
 // Uso:  node scripts/proximos-posts.mjs            (resumo)
 //       node scripts/proximos-posts.mjs --completo (com gancho e roteiro)
-// Lê URL e chave do .env.local deste projeto. Só leitura.
+// Lê do banco da Workflow (ver _env.mjs). Só leitura.
+// Até 18/11/2026 lia a antiga aba Instagram (ig_ideas), que foi importada para a esteira.
 
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { workflow } from './_env.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const env = Object.fromEntries(
-  readFileSync(join(root, '.env.local'), 'utf8')
-    .split(/\r?\n/)
-    .filter(line => line.includes('='))
-    .map(line => [line.slice(0, line.indexOf('=')).trim(), line.slice(line.indexOf('=') + 1).trim()])
-);
-
-const url = env.NEXT_PUBLIC_SUPABASE_URL;
-const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const { url, key } = workflow();
 const full = process.argv.includes('--completo');
 
-const get = async (path) => {
-  const res = await fetch(`${url}/rest/v1/${path}`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-  return res.json();
-};
+const res = await fetch(`${url}/rest/v1/cnt_pecas?select=*&etapa=neq.publicado`, {
+  headers: { apikey: key, Authorization: `Bearer ${key}` },
+});
+if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+const pecas = await res.json();
 
-const [ideas, models] = await Promise.all([
-  get('ig_ideas?select=*&status=in.(pronta,producao,brainstorm)'),
-  get('ig_models?select=id,name'),
-]);
-
-const modelName = Object.fromEntries(models.map(m => [m.id, m.name]));
 const byPriority = (a, b) =>
-  (a.priority ?? 2) - (b.priority ?? 2) ||
-  (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity) ||
+  a.prioridade - b.prioridade ||
+  (a.ordem ?? Infinity) - (b.ordem ?? Infinity) ||
   a.created_at.localeCompare(b.created_at);
 
-const levels = { 1: '🔥 Gravar agora', 2: '⏭️ Próximas', 3: '🕓 Depois' };
-const formats = { reels: 'Reels', carrossel: 'Carrossel', estatico: 'Estático', stories: 'Stories' };
-const types = { rapido: '⚡ Rápido 7s', fundo: '🎞️ Fundo', roteiro: '🎬 Roteiro', estatico: '🖼️ Carrossel / estático' };
+const plataformas = { youtube: 'YouTube', instagram: 'Instagram', linkedin: 'LinkedIn' };
+const formatos = { video_longo: 'Vídeo longo', video_curto: 'Vídeo curto', carrossel: 'Carrossel', imagem: 'Imagem', texto: 'Texto' };
+const gravacoes = { camera: 'Fala para a câmera', fundo: 'Texto sobre vídeo de fundo', rapido: 'Rápido 7 s' };
+const prioridades = { 1: 'Agora', 2: 'Próxima', 3: 'Depois' };
+const titulos = { editar: '✂️ Para editar', gravar: '🎬 Para gravar', postar: '📤 Para postar' };
 
-const line = (idea, n) => {
-  const meta = [types[idea.production_type], formats[idea.format], modelName[idea.model_id], idea.pillar].filter(Boolean).join(' · ');
-  let out = `${n}. ${idea.title}${meta ? `  (${meta})` : ''}`;
+const porId = Object.fromEntries(pecas.map(p => [p.id, p]));
+const line = (p, n) => {
+  const meta = [prioridades[p.prioridade], plataformas[p.plataforma], formatos[p.formato], gravacoes[p.gravacao], p.data]
+    .filter(Boolean).join(' · ');
+  let out = `${n}. ${p.titulo}  (${meta})`;
+  if (p.mae_id) out += `\n   corte de: ${porId[p.mae_id]?.titulo ?? 'peça publicada'}`;
   if (full) {
-    if (idea.hook) out += `\n   Gancho: ${idea.hook}`;
-    if (idea.description) out += `\n   ${idea.description.replace(/\n/g, '\n   ')}`;
+    if (p.gancho) out += `\n   Gancho: ${p.gancho}`;
+    if (p.roteiro) out += `\n   ${p.roteiro.replace(/\n/g, '\n   ')}`;
+    if (p.cta) out += `\n   CTA: ${p.cta}`;
   }
   return out;
 };
 
-const production = ideas.filter(i => i.status === 'producao').sort(byPriority);
-const ready = ideas.filter(i => i.status === 'pronta').sort(byPriority);
-const brainstorm = ideas.filter(i => i.status === 'brainstorm');
-
-console.log(`# Próximos posts · ${new Date().toLocaleDateString('pt-BR')}\n`);
-
-if (production.length) {
-  console.log('## 🎬 Em produção');
-  production.forEach((idea, i) => console.log(line(idea, i + 1)));
+console.log(`# Esteira de conteúdo · ${new Date().toLocaleDateString('pt-BR')}\n`);
+for (const etapa of ['editar', 'gravar', 'postar']) {
+  const grupo = pecas.filter(p => p.etapa === etapa).sort(byPriority);
+  if (!grupo.length) continue;
+  console.log(`## ${titulos[etapa]} (${grupo.length})`);
+  grupo.forEach((p, i) => console.log(line(p, i + 1)));
   console.log();
 }
-
-for (const [value, label] of Object.entries(levels)) {
-  const group = ready.filter(i => (i.priority ?? 2) === Number(value));
-  if (!group.length) continue;
-  console.log(`## ${label}`);
-  group.forEach((idea, i) => console.log(line(idea, i + 1)));
-  console.log();
-}
-
-console.log(`Tempestade (ideias ainda sem triagem): ${brainstorm.length}`);
+console.log(`Ideias ainda sem roteiro: ${pecas.filter(p => p.etapa === 'ideia').length}`);

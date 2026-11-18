@@ -61,7 +61,7 @@ Apagar um modelo ou inspiração não apaga as ideias ligadas (`on delete set nu
 
 ## Acesso de outras sessões (06/10/2026)
 
-- **Consultar os próximos posts:** `node scripts/proximos-posts.mjs` (`--completo` inclui gancho e
+- **(até 18/11; agora lê a esteira de Conteúdo, ver abaixo) Consultar os próximos posts:** `node scripts/proximos-posts.mjs` (`--completo` inclui gancho e
   roteiro). Só lê, na ordem do Banco de ideias: em produção, Gravar agora, Próximas, Depois.
 - **Credenciais:** `.env.local` deste projeto (`NEXT_PUBLIC_SUPABASE_URL`,
   `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Fica fora do git; ler do arquivo, nunca copiar o valor.

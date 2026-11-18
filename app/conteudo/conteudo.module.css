@@ -1,0 +1,102 @@
+.container { display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.4s ease-out forwards; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.header > button { white-space: nowrap; flex-shrink: 0; }
+.section { display: flex; flex-direction: column; gap: 16px; }
+
+/* Abas e filtros */
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--bg-sunken); border: 1px solid var(--border-color); overflow-x: auto; max-width: 100%; }
+.tab { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
+.tab:hover { color: var(--text-primary); }
+.tabActive { color: var(--accent-text); background: var(--bg-surface); font-weight: 600; box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border-color); }
+.tabCount { font-size: 0.72rem; padding: 1px 7px; border-radius: 9999px; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--text-secondary); }
+.filtros { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.chip { padding: 6px 12px; border-radius: 9999px; font-size: 0.85rem; color: var(--text-secondary); border: 1px solid var(--border-color); }
+.chip:hover { border-color: var(--border-color-hover); color: var(--text-primary); }
+.chipAtivo { color: var(--accent-text); border-color: var(--accent-ring); background: var(--accent-soft); }
+.busca { width: 180px; padding: 6px 10px; }
+
+/* Esteira */
+.board { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
+.coluna { display: flex; flex-direction: column; gap: 10px; background: var(--bg-sunken); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 12px; min-width: 0; }
+.colunaHead { display: flex; flex-direction: column; gap: 2px; }
+.colunaTitulo { font-size: 1rem; font-weight: 600; color: var(--text-strong); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.proximo { font-size: 0.8rem; color: var(--text-muted); }
+.count { font-size: 0.75rem; font-weight: 500; padding: 1px 8px; border-radius: 9999px; background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--text-secondary); }
+.countAlerta { background: color-mix(in srgb, var(--c-amber) 20%, transparent); color: var(--c-amber); }
+.alerta { font-size: 0.82rem; color: var(--c-amber); }
+.colunaLista { display: flex; flex-direction: column; gap: 8px; }
+.vazio { font-size: 0.85rem; color: var(--text-muted); padding: 8px 2px; }
+
+.card { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border-color); border-left: 3px solid; border-radius: var(--radius-sm); overflow: hidden; }
+.cardBody { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; text-align: left; }
+.cardBody:hover { background: var(--bg-surface-hover); }
+.cardMeta { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cardTitulo { font-size: 0.9rem; color: var(--text-primary); line-height: 1.35; overflow-wrap: anywhere; }
+.cardSub { font-size: 0.78rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.agora { font-size: 0.7rem; font-weight: 600; padding: 0 6px; border-radius: 4px; color: var(--c-red); background: color-mix(in srgb, var(--c-red) 14%, transparent); }
+.cardCortes { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 8px; }
+.corteChip { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--text-secondary); text-align: left; padding: 3px 6px; border-radius: 6px; background: var(--bg-sunken); }
+.corteChip:hover { color: var(--text-primary); }
+.avancar { font-size: 0.8rem; color: var(--accent-text); padding: 7px 12px; text-align: left; border-top: 1px solid var(--border-color); }
+.avancar:hover { background: var(--accent-soft); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Gravar */
+.grupo { display: flex; flex-direction: column; gap: 6px; }
+.grupoTitulo { font-size: 1.05rem; font-weight: 600; color: var(--text-strong); display: flex; align-items: center; gap: 8px; }
+.grupoLista { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.gravarLinha { display: flex; align-items: center; gap: 12px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 8px 8px 14px; }
+.gravarTexto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; }
+
+/* Calendário */
+.calHead { display: flex; align-items: center; gap: 12px; }
+.calTitulo { font-size: 1.1rem; font-weight: 600; text-transform: capitalize; min-width: 180px; text-align: center; }
+.calGrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.calDiaNome { font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 4px; }
+.calCelula { min-height: 96px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 4px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.calVazia { background: transparent; border-style: dashed; }
+.calHoje { border-color: var(--accent); }
+.calNum { font-size: 0.75rem; color: var(--text-muted); }
+.calPeca { font-size: 0.72rem; text-align: left; padding: 2px 5px; border-left: 3px solid; border-radius: 3px; background: var(--bg-sunken); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calFeita { text-decoration: line-through; color: var(--text-muted); }
+.legenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary); align-items: center; }
+.legenda > span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Publicado */
+.tabela { display: flex; flex-direction: column; gap: 4px; }
+.pubLinha { display: grid; grid-template-columns: 10px 64px 1fr 110px 130px; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: left; }
+.pubLinha:hover { background: var(--bg-surface-hover); }
+.pubData { font-size: 0.8rem; color: var(--text-muted); }
+.pubTitulo { font-size: 0.9rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pubNum { display: flex; flex-direction: column; font-size: 0.95rem; color: var(--text-strong); text-align: right; }
+.pubNum small { font-size: 0.7rem; color: var(--text-muted); }
+
+/* Formulário */
+.form { display: flex; flex-direction: column; gap: 14px; }
+.formGroup { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.formGroup label { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.formRow3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.formActions { display: flex; justify-content: space-between; gap: 12px; }
+.formActions > :only-child { margin-left: auto; }
+.linkBtn { align-self: flex-start; font-size: 0.8rem; color: var(--accent-text); }
+.cortesBox { display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-sunken); }
+.cortesHead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.corteLinha { display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px; border-radius: 6px; }
+.corteLinha:hover { background: var(--bg-surface-hover); }
+.corteTitulo { flex: 1; min-width: 0; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { font-size: 0.78rem; color: var(--text-muted); }
+
+.setupBox { padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.setupBox code { background: var(--bg-sunken); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+
+@media (max-width: 760px) {
+  .header { flex-direction: column; }
+  .board { grid-template-columns: repeat(4, 82vw); }
+  .formRow, .formRow3 { grid-template-columns: 1fr; }
+  .pubLinha { grid-template-columns: 10px 1fr 80px 80px; }
+  .pubData { display: none; }
+  .calCelula { min-height: 64px; }
+  .calPeca { font-size: 0.65rem; }
+}

@@ -63,14 +63,13 @@ const navItems = [
     )
   },
   {
-    // Substitui o antigo item "Instagram" (18/11/2026): a esteira cobre YouTube, Instagram e LinkedIn.
-    // A página /instagram continua no ar só para consulta, fora do menu.
-    name: 'Conteúdo',
-    path: '/conteudo',
+    name: 'Instagram',
+    path: '/instagram',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="4" width="20" height="16" rx="3" ry="3"></rect>
-        <polygon points="10 9 15 12 10 15 10 9"></polygon>
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
       </svg>
     )
   },

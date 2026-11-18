@@ -1,9 +1,11 @@
 # Conteúdo · esteira de produção (YouTube, Instagram, LinkedIn)
 
 Criado em 18/11/2026, a pedido dele: *"prezar sempre por clareza"* e *"trabalhar no modelo de esteira,
-pensando que vídeos do YT vão ser úteis para postar no Instagram"*. Rota `/conteudo`, item **Conteúdo**
-no menu. Substitui a aba Instagram (`/instagram` segue no ar só para consulta, fora do menu; não se
-grava mais lá).
+pensando que vídeos do YT vão ser úteis para postar no Instagram"*.
+
+**A tela mora no CRM** (`workflow-crm`, decisão dele em 18/11), não neste app. Ficou aqui por algumas
+horas e foi retirada no mesmo dia. Deste repositório ficam só os scripts abaixo e o SQL. A aba
+Instagram deste app volta a ser a de antes; as ideias dela já foram importadas para a esteira.
 
 ## Definições
 
@@ -18,7 +20,7 @@ grava mais lá).
 Corte nasce em Para editar. **Teto: 5 peças em Para editar.** LinkedIn é linha própria: corte só vai
 para lá quando ele disser. Nada é publicado pelo sistema.
 
-## Abas
+## Abas (no CRM)
 
 Esteira (quadro) · Gravar (agrupado pelo jeito de gravar) · Calendário · Publicado (dois números por
 plataforma: Instagram views e seguidores ganhos; YouTube views e inscritos ganhos; LinkedIn
@@ -27,12 +29,9 @@ impressões e comentários).
 ## Dados
 
 Uma tabela, `cnt_pecas` (SQL em `supabase/conteudo.sql`), no **Supabase da Workflow** (o mesmo do CRM
-e da automação; decisão dele em 18/11/2026), não no banco do sistema de gestão. **Acesso só pelo
-servidor do app** (`app/api/conteudo`, `lib/workflowDb.ts`, chave secreta): a tabela é fechada para a
-chave pública, e a chave pública daquele projeto nunca vai para o navegador, porque outras tabelas de
-lá estão abertas para ela. Variáveis: `WORKFLOW_SUPABASE_URL` e `WORKFLOW_SUPABASE_SECRET_KEY`, no
-`.env.local` e nas variáveis da Vercel. Os scripts, sem elas, leem do `.env.local` do CRM no
-`conteudo-os` (sem copiar o valor). Briefing só em texto: gancho, roteiro,
+e da automação; decisão dele em 18/11/2026), não no banco do sistema de gestão. A tabela é fechada para a
+chave pública (só a chave secreta, no servidor, lê e grava). Os scripts leem a chave do `.env.local`
+do CRM no `conteudo-os`, sem copiar o valor. Briefing só em texto: gancho, roteiro,
 CTA, referência. Nada de instrução de produção ou caminho de arquivo; isso mora no repositório
 `conteudo-os`.
 

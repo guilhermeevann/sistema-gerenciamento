@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showToast } from '@/components/Toast';
 import styles from '../ano.module.css';
-import { YearGoal, YearMeasure, YearPlan, areas, goalProgress, textOrNull } from '../types';
+import { YearGoal, YearMeasure, YearPlan, areas, goalProgress, isTopLevel, textOrNull } from '../types';
 
 interface Props {
   year: number;
@@ -60,11 +60,10 @@ export default function VisaoTab({ year, plan, goals, measures, onChange }: Prop
 
       <div className={`${styles.panel} glass-panel`}>
         <h3 className={styles.panelTitle}>Áreas da vida em {year}</h3>
-        <p className={styles.hint}>Um olhar rápido para ver se alguma área ficou sem objetivo nenhum.</p>
         <div className={styles.areaList}>
           {areas.map(area => {
-            const areaGoals = goals.filter(g => g.area === area.value && g.status !== 'pausado');
-            const ps = areaGoals.map(g => goalProgress(g, measures)).filter((v): v is number => v !== null);
+            const areaGoals = goals.filter(g => isTopLevel(g) && g.area === area.value && g.status !== 'pausado');
+            const ps = areaGoals.map(g => goalProgress(g, measures, goals)).filter((v): v is number => v !== null);
             const avg = ps.length ? Math.round((ps.reduce((a, b) => a + b, 0) / ps.length) * 100) : null;
             return (
               <div key={area.value} className={styles.areaRow}>

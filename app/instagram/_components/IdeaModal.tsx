@@ -62,6 +62,8 @@ export default function IdeaModal({ isOpen, idea, status, models, inspirations, 
   const [form, setForm] = useState(() => toForm(idea, status));
   const [saving, setSaving] = useState(false);
   const hasType = typeEnabled;
+  // Campos secundários ficam recolhidos; abrem sozinhos se já tiverem algo.
+  const [showMore, setShowMore] = useState(() => !!(idea?.format || idea?.model_id || idea?.pillar || idea?.inspiration_id));
 
   const set = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -113,51 +115,61 @@ export default function IdeaModal({ isOpen, idea, status, models, inspirations, 
               {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
-          <div className={styles.formGroup}>
-            <label>Formato</label>
-            <select value={form.format} onChange={e => set('format', e.target.value)}>
-              <option value="">—</option>
-              {formats.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-            </select>
-          </div>
+          {hasType && (
+            <div className={styles.formGroup}>
+              <label>Tipo de produção</label>
+              <select value={form.production_type} onChange={e => set('production_type', e.target.value)}>
+                <option value="">Sem tipo</option>
+                {productionTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+          )}
         </div>
-        {hasType && (
-          <div className={styles.formGroup}>
-            <label>Tipo de produção</label>
-            <select value={form.production_type} onChange={e => set('production_type', e.target.value)}>
-              <option value="">Sem tipo</option>
-              {productionTypes.map(t => <option key={t.value} value={t.value}>{t.label} · {t.hint}</option>)}
-            </select>
-          </div>
-        )}
         <div className={styles.formGroup}>
           <label>Gancho</label>
-          <input value={form.hook} onChange={e => set('hook', e.target.value)} placeholder="A primeira frase / os 3 primeiros segundos" />
+          <input value={form.hook} onChange={e => set('hook', e.target.value)} placeholder="A primeira frase" />
         </div>
         <div className={styles.formGroup}>
-          <label>Roteiro / desenvolvimento</label>
+          <label>Roteiro</label>
           <textarea rows={8} value={form.description} onChange={e => set('description', e.target.value)} />
         </div>
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Modelo</label>
-            <select value={form.model_id} onChange={e => set('model_id', e.target.value)}>
-              <option value="">Nenhum</option>
-              {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-            </select>
-          </div>
-          <div className={styles.formGroup}>
-            <label>Pilar / tema</label>
-            <input value={form.pillar} onChange={e => set('pillar', e.target.value)} placeholder="Ex: Autoridade" />
-          </div>
-        </div>
-        <div className={styles.formGroup}>
-          <label>Inspiração</label>
-          <select value={form.inspiration_id} onChange={e => set('inspiration_id', e.target.value)}>
-            <option value="">Nenhuma</option>
-            {inspirations.map(i => <option key={i.id} value={i.id}>{i.title}</option>)}
-          </select>
-        </div>
+
+        <button type="button" className={styles.moreToggle} onClick={() => setShowMore(v => !v)} aria-expanded={showMore}>
+          {showMore ? '▾' : '▸'} Mais detalhes
+        </button>
+        {showMore && (
+          <>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Formato</label>
+                <select value={form.format} onChange={e => set('format', e.target.value)}>
+                  <option value="">—</option>
+                  {formats.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Pilar / tema</label>
+                <input value={form.pillar} onChange={e => set('pillar', e.target.value)} placeholder="Ex: Autoridade" />
+              </div>
+            </div>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Modelo</label>
+                <select value={form.model_id} onChange={e => set('model_id', e.target.value)}>
+                  <option value="">Nenhum</option>
+                  {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Inspiração</label>
+                <select value={form.inspiration_id} onChange={e => set('inspiration_id', e.target.value)}>
+                  <option value="">Nenhuma</option>
+                  {inspirations.map(i => <option key={i.id} value={i.id}>{i.title}</option>)}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
 
         {published && (
           <>

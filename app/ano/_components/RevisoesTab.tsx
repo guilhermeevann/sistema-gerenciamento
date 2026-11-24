@@ -50,15 +50,6 @@ export default function RevisoesTab({ year, reviews, onChange }: Props) {
 
   return (
     <section className={styles.section}>
-      <div className={`${styles.panel} glass-panel`}>
-        <h3 className={styles.panelTitle}>Ritmo de acompanhamento</h3>
-        <ul className={styles.rhythm}>
-          <li><strong>Toda semana (15 min):</strong> atualize os números dos resultados-chave na aba Objetivos e veja se as alavancas foram feitas. Medir é retorno, não cobrança.</li>
-          <li><strong>Fim de cada trimestre:</strong> dê uma nota de 1 a 10, registre o que funcionou e o que vai ajustar no próximo ciclo.</li>
-          <li><strong>Objetivo fixo, caminho flexível:</strong> se um resultado-chave se mostrou errado, troque o número ou a alavanca, não o objetivo.</li>
-        </ul>
-      </div>
-
       <div className={styles.quarterTabs}>
         {[1, 2, 3, 4].map(q => {
           const done = reviews.some(r => r.quarter === q);

@@ -89,7 +89,6 @@ export default function InspiracoesTab({ inspirations, models, onChange }: Props
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Inspirações</h2>
-          <p className={styles.sectionHint}>Posts de outros perfis que valem estudar ou adaptar.</p>
         </div>
         <div className={styles.filters}>
           <select value={filter} onChange={e => setFilter(e.target.value)}>

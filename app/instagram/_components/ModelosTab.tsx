@@ -77,7 +77,6 @@ export default function ModelosTab({ models, ideas, onChange }: Props) {
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Modelos de conteúdo</h2>
-          <p className={styles.sectionHint}>Os formatos que você repete. Marque os principais.</p>
         </div>
         <button className="btn btn-primary" onClick={() => open()}>+ Novo modelo</button>
       </div>

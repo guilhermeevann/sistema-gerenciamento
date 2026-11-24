@@ -52,7 +52,6 @@ export default function TempestadeTab({ ideas, onEdit, onChange }: Props) {
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Tempestade de ideias</h2>
-          <p className={styles.sectionHint}>Joga tudo aqui sem filtro. Enter salva. Depois escolhe o que vale ir pro banco.</p>
         </div>
       </div>
 

@@ -220,7 +220,6 @@ export default function BancoTab({ ideas, models, onNew, onEdit, onChange }: Pro
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Banco de ideias</h2>
-          <p className={styles.sectionHint}>Tudo que ainda não virou post. Priorize o que vai gravar primeiro; ▲▼ move uma posição, ⤒⤓ manda direto pro topo ou pro fim.</p>
         </div>
         <button className="btn btn-primary" onClick={onNew}>+ Nova ideia</button>
       </div>

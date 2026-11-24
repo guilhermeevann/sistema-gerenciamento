@@ -742,3 +742,11 @@
 .cardTitleBtn {
   min-height: 24px;
 }
+
+.moreToggle {
+  align-self: flex-start;
+  min-height: 28px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}

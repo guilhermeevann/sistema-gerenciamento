@@ -53,7 +53,6 @@ export default function PublicadosTab({ ideas, models, onEdit, onNew, onChange }
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Publicados</h2>
-          <p className={styles.sectionHint}>Ideias que viraram post, com métricas e o que você aprendeu.</p>
         </div>
         <div className={styles.filters}>
           <label className={styles.toggle}>

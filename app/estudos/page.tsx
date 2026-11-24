@@ -311,7 +311,6 @@ export default function Estudos() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Estudos & Leituras</h1>
-          <p className="text-secondary">Acompanhe seus temas de estudo, adicione aulas e anote seus insights.</p>
         </div>
         <button className="btn btn-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}>
           + Novo Estudo

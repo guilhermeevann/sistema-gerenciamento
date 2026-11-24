@@ -439,3 +439,21 @@ button.checkbox {
   width: 24px;
   height: 24px;
 }
+
+.emptyCard {
+  padding: 16px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Abertura da Home em card */
+.hero {
+  padding: 22px 24px;
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}

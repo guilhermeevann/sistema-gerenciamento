@@ -17,12 +17,9 @@ export default function TrimestresTab({ year, goals, measures, reviews }: Props)
 
   return (
     <section className={styles.section}>
-      <p className={styles.hint}>
-        Cada trimestre é um ciclo curto: ~12 semanas de execução e 1 de revisão. Marque o trimestre nos objetivos, resultados e alavancas para eles aparecerem aqui.
-      </p>
       <div className={styles.quarterGrid}>
         {[1, 2, 3, 4].map(q => {
-          const qGoals = goals.filter(g => g.quarter === q && g.status !== 'pausado');
+          const qGoals = goals.filter(g => !g.parent_id && g.quarter === q && g.status !== 'pausado');
           const qMeasures = measures.filter(m => m.quarter === q && goalById[m.goal_id]?.status !== 'pausado');
           const review = reviews.find(r => r.quarter === q);
           return (

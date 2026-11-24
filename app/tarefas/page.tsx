@@ -212,7 +212,6 @@ export default function Tarefas() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Rotina & Tarefas</h1>
-          <p className="text-secondary">O dia de hoje está destacado. Use as setas para reordenar (ou mandar direto pro topo/fim) e + para adicionar num dia.</p>
         </div>
         <div className={styles.headerActions}>
           {tasks.some(t => t.type === 'extra') && (
@@ -231,13 +230,6 @@ export default function Tarefas() {
           </button>
         </div>
       </header>
-
-      {/* Legend */}
-      <div className={styles.legend}>
-        <span className={styles.legendItem}><span style={{ background: 'var(--c-blue)' }} className={styles.legendDot}></span>Rotina Diária</span>
-        <span className={styles.legendItem}><span style={{ background: 'var(--c-green)' }} className={styles.legendDot}></span>Fixo Semanal</span>
-        <span className={styles.legendItem}><span style={{ background: 'var(--c-violet)' }} className={styles.legendDot}></span>Avulso</span>
-      </div>
 
       <div className={styles.content}>
         {loading ? (

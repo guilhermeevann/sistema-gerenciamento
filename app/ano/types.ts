@@ -20,6 +20,8 @@ export interface YearGoal {
   if_then: string | null;
   status: GoalStatus;
   sort_order: number | null;
+  // Submeta: aponta para a meta-mãe. Só existe depois de rodar supabase/submetas.sql.
+  parent_id?: string | null;
   created_at: string;
 }
 
@@ -90,12 +92,20 @@ export const measureProgress = (m: YearMeasure) => {
   return Math.min(1, Math.max(0, ((m.current_value ?? start) - start) / span));
 };
 
-export const goalProgress = (goal: YearGoal, measures: YearMeasure[]) => {
+// Progresso de uma meta: média dos próprios resultados-chave e das submetas.
+// Submeta concluída conta 100%; aberta conta pelo próprio progresso (ou 0%).
+export const goalProgress = (goal: YearGoal, measures: YearMeasure[], allGoals: YearGoal[] = []): number | null => {
   if (goal.status === 'concluido') return 1;
-  const values = measures.filter(m => m.goal_id === goal.id).map(measureProgress).filter((v): v is number => v !== null);
+  const own = measures.filter(m => m.goal_id === goal.id).map(measureProgress).filter((v): v is number => v !== null);
+  const subs = allGoals
+    .filter(g => g.parent_id === goal.id && g.status !== 'pausado')
+    .map(g => goalProgress(g, measures, allGoals) ?? 0);
+  const values = [...own, ...subs];
   if (values.length === 0) return null;
   return values.reduce((a, b) => a + b, 0) / values.length;
 };
+
+export const isTopLevel = (g: YearGoal) => !g.parent_id;
 
 export const fmtNumber = (n: number | null, unit?: string | null) => {
   if (n == null) return '—';

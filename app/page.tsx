@@ -20,6 +20,7 @@ export default function Home() {
   // Foco Principal = objetivos do ano corrente no planejamento anual (a antiga página Metas foi incorporada).
   const [goals, setGoals] = useState<YearGoal[]>([]);
   const [goalMeasures, setGoalMeasures] = useState<YearMeasure[]>([]);
+  const [allGoals, setAllGoals] = useState<YearGoal[]>([]);
   const [weeklyWords, setWeeklyWords] = useState<any[]>([]);
   const [routineTasks, setRoutineTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,11 +69,14 @@ export default function Home() {
     ]);
 
     if (goalsRes.error || tasksRes.error) showToast('Erro ao carregar o painel.', 'error');
-    const yearGoals = (goalsRes.data ?? []) as YearGoal[];
+    const allYearGoals = (goalsRes.data ?? []) as YearGoal[];
+    setAllGoals(allYearGoals);
+    // Foco Principal mostra só as metas; submetas entram no progresso delas.
+    const yearGoals = allYearGoals.filter(g => !g.parent_id);
     // Em andamento primeiro; concluídos ficam no fim, apagados.
     setGoals([...yearGoals].sort((a, b) => Number(a.status === 'concluido') - Number(b.status === 'concluido')));
     if (yearGoals.length) {
-      const { data: measuresData } = await supabase.from('year_measures').select('*').in('goal_id', yearGoals.map(g => g.id));
+      const { data: measuresData } = await supabase.from('year_measures').select('*').in('goal_id', allYearGoals.map(g => g.id));
       setGoalMeasures(measuresData ?? []);
     } else {
       setGoalMeasures([]);
@@ -194,10 +198,9 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
+      <header className={`${styles.header} ${styles.hero} glass-panel`}>
         <p className={styles.dateLabel}>{todayLabel}</p>
         <h1 className="h2">Olá, Guilherme.</h1>
-        <p className="text-secondary">O que vamos construir hoje?</p>
         {nextMilestone && (() => {
           const days = Math.round((new Date(nextMilestone.date + 'T12:00:00').getTime() - new Date(todayLocal() + 'T12:00:00').getTime()) / 86_400_000);
           return (
@@ -212,8 +215,7 @@ export default function Home() {
       <section className={styles.wordsSection}>
         <div className={styles.wordsSectionHeader}>
           <div>
-            <span className={styles.wordTitle}>Palavras da Semana</span>
-            <span className={styles.wordsCount}>{weeklyWords.length} palavra{weeklyWords.length !== 1 ? 's' : ''}</span>
+            <h2 className={styles.sectionTitle}>Palavras da Semana</h2>
           </div>
           <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '6px 14px' }} onClick={openNewWordModal}>
             + Nova Palavra
@@ -260,7 +262,6 @@ export default function Home() {
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className="h3">Rotina de Hoje</h2>
-                <p className="text-secondary" style={{ fontSize: '0.9rem' }}>O que fizemos hoje?</p>
               </div>
               <Link href="/tarefas" className={styles.sectionLink}>Gerenciar →</Link>
             </div>
@@ -326,14 +327,16 @@ export default function Home() {
 
           <div className={styles.goalsList}>
             {goals.length === 0 ? (
-              <p className="text-muted">
+              <p className={`${styles.emptyCard} glass-panel`}>
                 Nenhum objetivo para {new Date().getFullYear()}. <Link href={`/ano?ano=${new Date().getFullYear()}`} className={styles.sectionLink}>Planejar o ano</Link>
               </p>
             ) : (
               goals.map(goal => {
                 const done = goal.status === 'concluido';
                 const area = areaOf(goal.area);
-                const progress = goalProgress(goal, goalMeasures);
+                const progress = goalProgress(goal, goalMeasures, allGoals);
+                const subs = allGoals.filter(g => g.parent_id === goal.id);
+                const subsDone = subs.filter(g => g.status === 'concluido').length;
                 return (
                   <div key={goal.id} className={`${styles.goalCard} glass-panel ${done ? styles.goalCompleted : ''}`} style={{ borderLeft: `3px solid ${area.color}` }}>
                     <div className={styles.goalHeader}>
@@ -352,14 +355,13 @@ export default function Home() {
                       </div>
                       {goal.quarter && <span className="badge badge-amber">T{goal.quarter}</span>}
                     </div>
-                    <span className={styles.goalArea} style={{ color: area.color }}>{area.label}</span>
+                    <span className={styles.goalArea} style={{ color: area.color }}>{area.label}{subs.length ? ` · ${subsDone}/${subs.length} submetas` : ''}</span>
                     {progress !== null && (
                       <div className={styles.goalProgress}>
                         <span className={styles.goalProgressBar}><span style={{ width: `${Math.round(progress * 100)}%`, background: area.color }} /></span>
                         <span className={styles.goalProgressValue}>{Math.round(progress * 100)}%</span>
                       </div>
                     )}
-                    {goal.why && <p className={styles.goalDesc}>{goal.why}</p>}
                   </div>
                 );
               })

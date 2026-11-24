@@ -66,7 +66,6 @@ export default function Marcos() {
     const d = parseDate(m.date);
     return d >= from && d < to;
   });
-  const outside = milestones.length - inRange.length;
   const next = milestones.find(m => !m.done && parseDate(m.date) >= today);
 
   const open = (m?: Milestone) => {
@@ -172,7 +171,6 @@ export default function Marcos() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Linha do Tempo</h1>
-          <p className="text-secondary">Os marcos que importam nos próximos meses, num traço só.</p>
         </div>
         {!missingTable && <button className="btn btn-primary" onClick={() => open()}>+ Novo marco</button>}
       </header>
@@ -226,15 +224,6 @@ export default function Marcos() {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className={styles.legend}>
-            {kinds.map(k => (
-              <span key={k.value} className={styles.legendItem}>
-                <span className={styles.legendDiamond} style={{ borderColor: k.color }} />{k.label}
-              </span>
-            ))}
-            {outside > 0 && <span className={styles.outside}>{outside} marco(s) fora deste período</span>}
           </div>
 
           <div className={`${styles.board} glass-panel`}>

@@ -114,7 +114,6 @@ export default function GanchosSection({ onIdeaCreated }: Props) {
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>🪝 Banco de ganchos</h2>
-          <p className={styles.sectionHint}>Aberturas que te prenderam. Guarde o texto, de onde veio e por que funcionou.</p>
         </div>
         {!missingTable && <button className="btn btn-primary" onClick={() => open()}>+ Novo gancho</button>}
       </div>

@@ -85,14 +85,6 @@ export default function Instagram() {
         ))}
       </div>
 
-      <div className={styles.funnel}>
-        <span>🌪️ {count('brainstorm')} na tempestade</span><span>→</span>
-        <span>✅ {count('pronta')} prontas</span><span>→</span>
-        <span>🎬 {count('producao')} em produção</span><span>→</span>
-        <span>📤 {published.length} publicadas</span><span>→</span>
-        <span>🔥 {hits.length} performaram</span>
-      </div>
-
       <div className={styles.overviewCols}>
         <div className={`${styles.panel} glass-panel`}>
           <h3 className={styles.panelTitle}>🔥 Top posts por views</h3>
@@ -129,7 +121,6 @@ export default function Instagram() {
       <header className={styles.header}>
         <div>
           <h1 className="h2">Planejamento do Instagram</h1>
-          <p className="text-secondary">Modelos, inspirações, ideias e o que já foi ao ar, num lugar só.</p>
         </div>
         {!missingTables && (
           <button className="btn btn-primary" onClick={() => setTab('tempestade')}>🌪️ Anotar ideia</button>

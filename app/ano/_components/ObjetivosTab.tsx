@@ -8,7 +8,7 @@ import { confirmAction } from '@/components/ConfirmDialog';
 import styles from '../ano.module.css';
 import {
   Area, GoalStatus, MAX_FOCUS, MeasureKind, YearGoal, YearMeasure,
-  areaOf, areas, fmtNumber, goalProgress, measureProgress, numOrNull, statusLabels, textOrNull,
+  areaOf, areas, fmtNumber, goalProgress, isTopLevel, measureProgress, numOrNull, statusLabels, textOrNull,
 } from '../types';
 
 interface Props {
@@ -32,9 +32,20 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
   const [measureForm, setMeasureForm] = useState(emptyMeasure);
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  // Detalhes (porquê, números, alavancas, obstáculo) ficam recolhidos para o card ficar limpo.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [subDrafts, setSubDrafts] = useState<Record<string, string>>({});
+  const [showMore, setShowMore] = useState(false);
 
-  const active = goals.filter(g => g.status === 'ativo');
-  const sorted = [...goals].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  // Metas são os objetivos sem mãe; submetas aparecem dentro do card da meta.
+  const topLevel = goals.filter(isTopLevel);
+  const active = topLevel.filter(g => g.status === 'ativo');
+  const sorted = [...topLevel].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  const subsOf = (id: string) =>
+    goals
+      .filter(g => g.parent_id === id)
+      .sort((a, b) => Number(a.status === 'concluido') - Number(b.status === 'concluido') || a.created_at.localeCompare(b.created_at));
+  const isSub = !!goalModal.editing?.parent_id;
 
   // ---------- Objetivos ----------
   const openGoal = (goal?: YearGoal) => {
@@ -47,6 +58,7 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
       if_then: goal.if_then ?? '',
       status: goal.status,
     } : emptyGoal);
+    setShowMore(!!(goal?.why || goal?.obstacle || goal?.if_then));
     setGoalModal({ open: true, editing: goal ?? null });
   };
 
@@ -71,7 +83,7 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
       : await supabase.from('year_goals').insert([data]);
     setSaving(false);
     if (error) { showToast('Erro ao salvar objetivo.', 'error'); return; }
-    showToast(goalModal.editing ? 'Objetivo atualizado!' : 'Objetivo criado!');
+    showToast(goalModal.editing ? 'Salvo!' : 'Objetivo criado!');
     if (!goalModal.editing && active.length >= MAX_FOCUS) {
       showToast(`Você já tem ${active.length + 1} objetivos ativos. Considere pausar algum para manter o foco.`, 'info');
     }
@@ -82,7 +94,9 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
   const deleteGoal = async (goal: YearGoal) => {
     const ok = await confirmAction({
       title: 'Deletar objetivo?',
-      message: `"${goal.title}" e todos os resultados-chave e alavancas dele serão apagados.`,
+      message: goal.parent_id
+        ? `A submeta "${goal.title}" será apagada.`
+        : `"${goal.title}", suas submetas, resultados-chave e alavancas serão apagados.`,
       confirmLabel: 'Deletar',
       danger: true,
     });
@@ -99,6 +113,28 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
     if (status === 'concluido') showToast('Objetivo concluído! 🎉');
     onChange();
   };
+
+  // ---------- Submetas ----------
+  const addSub = async (goal: YearGoal) => {
+    const title = (subDrafts[goal.id] ?? '').trim();
+    if (!title) return;
+    const { error } = await supabase.from('year_goals').insert([{
+      year,
+      title,
+      area: goal.area,
+      quarter: goal.quarter,
+      parent_id: goal.id,
+      status: 'ativo',
+    }]);
+    if (error) {
+      showToast(error.code === 'PGRST204' ? 'Falta rodar supabase/submetas.sql no Supabase.' : 'Erro ao criar submeta.', 'error');
+      return;
+    }
+    setSubDrafts(prev => ({ ...prev, [goal.id]: '' }));
+    onChange();
+  };
+
+  const toggleSub = (sub: YearGoal) => setStatus(sub, sub.status === 'concluido' ? 'ativo' : 'concluido');
 
   // ---------- Resultados-chave e alavancas ----------
   const openMeasure = (goalId: string, kind: MeasureKind, m?: YearMeasure) => {
@@ -167,30 +203,30 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
 
   const renderGoal = (goal: YearGoal) => {
     const area = areaOf(goal.area);
-    const progress = goalProgress(goal, measures);
+    const progress = goalProgress(goal, measures, goals);
+    const subs = subsOf(goal.id);
+    const subsDone = subs.filter(g => g.status === 'concluido').length;
     const results = measures.filter(m => m.goal_id === goal.id && m.kind === 'resultado');
     const levers = measures.filter(m => m.goal_id === goal.id && m.kind === 'alavanca');
+    const open = !!expanded[goal.id];
+    const detailCount = results.length + levers.length + (goal.why ? 1 : 0) + (goal.obstacle || goal.if_then ? 1 : 0);
+
     return (
       <article key={goal.id} className={`${styles.goalCard} ${goal.status !== 'ativo' ? styles.goalMuted : ''} glass-panel`} style={{ borderLeftColor: area.color }}>
         <header className={styles.goalHeader}>
           <div className={styles.goalHeading}>
-            <span className={styles.goalArea} style={{ color: area.color }}>{area.label}</span>
+            <span className={styles.goalArea} style={{ color: area.color }}>{area.label}{goal.quarter ? ` · T${goal.quarter}` : ''}</span>
             <button className={styles.goalTitle} onClick={() => openGoal(goal)}>{goal.title}</button>
           </div>
-          <div className={styles.goalChips}>
-            {goal.quarter && <span className={styles.chip}>Prazo: T{goal.quarter}</span>}
-            <select
-              className={`${styles.statusSelect} ${styles[`status_${goal.status}`]}`}
-              value={goal.status}
-              onChange={e => setStatus(goal, e.target.value as GoalStatus)}
-              aria-label="Status do objetivo"
-            >
-              {(Object.keys(statusLabels) as GoalStatus[]).map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}
-            </select>
-          </div>
+          <select
+            className={`${styles.statusSelect} ${styles[`status_${goal.status}`]}`}
+            value={goal.status}
+            onChange={e => setStatus(goal, e.target.value as GoalStatus)}
+            aria-label="Status do objetivo"
+          >
+            {(Object.keys(statusLabels) as GoalStatus[]).map(st => <option key={st} value={st}>{statusLabels[st]}</option>)}
+          </select>
         </header>
-
-        {goal.why && <p className={styles.why}><span>Por quê:</span> {goal.why}</p>}
 
         {progress !== null && (
           <div className={styles.progressRow}>
@@ -199,64 +235,112 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
           </div>
         )}
 
-        <section className={styles.block}>
-          <div className={styles.blockHeader}>
-            <h4>📊 Resultados-chave <small>o número que você quer</small></h4>
-            <button className={styles.addLink} onClick={() => openMeasure(goal.id, 'resultado')}>+ resultado</button>
-          </div>
-          {results.length === 0 && <p className={styles.empty}>Como você vai saber que chegou? Ex.: faturamento mensal, nº de clientes, peso.</p>}
-          {results.map(m => {
-            const p = measureProgress(m);
+        <section className={styles.subs} aria-label="Submetas">
+          {subs.length > 0 && (
+            <div className={styles.subsHeader}>
+              <span>Submetas</span>
+              <span className={styles.subsCount}>{subsDone}/{subs.length}</span>
+            </div>
+          )}
+          {subs.map(sg => {
+            const done = sg.status === 'concluido';
             return (
-              <div key={m.id} className={styles.measure}>
-                <button className={styles.measureTitle} onClick={() => openMeasure(goal.id, 'resultado', m)}>
-                  {m.title}{m.quarter ? <span className={styles.chipSmall}>T{m.quarter}</span> : null}
+              <div key={sg.id} className={`${styles.subRow} ${done ? styles.subDone : ''}`}>
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={done}
+                  aria-label={`Concluir submeta ${sg.title}`}
+                  className={`${styles.subCheck} ${done ? styles.subCheckOn : ''}`}
+                  onClick={() => toggleSub(sg)}
+                >
+                  {done && '✓'}
                 </button>
-                <div className={styles.measureNumbers}>
-                  <input
-                    className={styles.currentInput}
-                    inputMode="decimal"
-                    value={drafts[m.id] ?? (m.current_value?.toString() ?? '')}
-                    onChange={e => setDrafts(prev => ({ ...prev, [m.id]: e.target.value }))}
-                    onBlur={() => saveCurrent(m)}
-                    onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-                    aria-label={`Valor atual de ${m.title}`}
-                    title="Valor atual: edite e aperte Enter"
-                  />
-                  <span className={styles.target}>/ {fmtNumber(m.target_value, m.unit)}</span>
-                  <span className={styles.measurePct}>{p !== null ? `${Math.round(p * 100)}%` : ''}</span>
-                </div>
-                <span className={styles.measureBar}><span style={{ width: `${Math.round((p ?? 0) * 100)}%`, background: area.color }} /></span>
+                <button className={styles.subTitle} onClick={() => openGoal(sg)}>{sg.title}</button>
+                {sg.quarter && sg.quarter !== goal.quarter && <span className={styles.chipSmall}>T{sg.quarter}</span>}
               </div>
             );
           })}
+          <form className={styles.subAdd} onSubmit={e => { e.preventDefault(); addSub(goal); }}>
+            <input
+              value={subDrafts[goal.id] ?? ''}
+              onChange={e => { const v = e.target.value; setSubDrafts(prev => ({ ...prev, [goal.id]: v })); }}
+              placeholder="+ Adicionar submeta"
+              aria-label={`Nova submeta de ${goal.title}`}
+            />
+          </form>
         </section>
 
-        <section className={styles.block}>
-          <div className={styles.blockHeader}>
-            <h4>⚙️ Alavancas <small>a ação semanal que você controla</small></h4>
-            <button className={styles.addLink} onClick={() => openMeasure(goal.id, 'alavanca')}>+ alavanca</button>
+        <button
+          className={styles.detailsToggle}
+          onClick={() => setExpanded(prev => ({ ...prev, [goal.id]: !open }))}
+          aria-expanded={open}
+        >
+          {open ? '▾' : '▸'} Detalhes{detailCount ? ` (${detailCount})` : ''}
+        </button>
+
+        {open && (
+          <div className={styles.details}>
+            {goal.why && <div className={styles.whyBox}><span>Por quê</span>{goal.why}</div>}
+
+            <section className={styles.block}>
+              <div className={styles.blockHeader}>
+                <h4>📊 Resultados-chave</h4>
+                <button className={styles.addLink} onClick={() => openMeasure(goal.id, 'resultado')}>+ resultado</button>
+              </div>
+              {results.map(m => {
+                const pm = measureProgress(m);
+                return (
+                  <div key={m.id} className={styles.measure}>
+                    <button className={styles.measureTitle} onClick={() => openMeasure(goal.id, 'resultado', m)}>
+                      {m.title}{m.quarter ? <span className={styles.chipSmall}>T{m.quarter}</span> : null}
+                    </button>
+                    <div className={styles.measureNumbers}>
+                      <input
+                        className={styles.currentInput}
+                        inputMode="decimal"
+                        value={drafts[m.id] ?? (m.current_value?.toString() ?? '')}
+                        onChange={e => setDrafts(prev => ({ ...prev, [m.id]: e.target.value }))}
+                        onBlur={() => saveCurrent(m)}
+                        onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                        aria-label={`Valor atual de ${m.title}`}
+                        title="Valor atual: edite e aperte Enter"
+                      />
+                      <span className={styles.target}>/ {fmtNumber(m.target_value, m.unit)}</span>
+                      <span className={styles.measurePct}>{pm !== null ? `${Math.round(pm * 100)}%` : ''}</span>
+                    </div>
+                    <span className={styles.measureBar}><span style={{ width: `${Math.round((pm ?? 0) * 100)}%`, background: area.color }} /></span>
+                  </div>
+                );
+              })}
+            </section>
+
+            <section className={styles.block}>
+              <div className={styles.blockHeader}>
+                <h4>⚙️ Alavancas</h4>
+                <button className={styles.addLink} onClick={() => openMeasure(goal.id, 'alavanca')}>+ alavanca</button>
+              </div>
+              {levers.map(m => (
+                <button key={m.id} className={styles.lever} onClick={() => openMeasure(goal.id, 'alavanca', m)}>
+                  <span>{m.title}</span>
+                  {m.frequency && <span className={styles.frequency}>{m.frequency}</span>}
+                </button>
+              ))}
+            </section>
+
+            {(goal.obstacle || goal.if_then) && (
+              <section className={styles.woop}>
+                {goal.obstacle && <p><span>🧱 Obstáculo:</span> {goal.obstacle}</p>}
+                {goal.if_then && <p><span>↪️ Se acontecer:</span> {goal.if_then}</p>}
+              </section>
+            )}
+
+            <footer className={styles.goalFooter}>
+              <button className="btn btn-secondary" onClick={() => openGoal(goal)}>Editar</button>
+              <button className="btn btn-danger" onClick={() => deleteGoal(goal)}>Deletar</button>
+            </footer>
           </div>
-          {levers.length === 0 && <p className={styles.empty}>O que você vai fazer toda semana para mover o resultado? Ex.: 10 abordagens por dia.</p>}
-          {levers.map(m => (
-            <button key={m.id} className={styles.lever} onClick={() => openMeasure(goal.id, 'alavanca', m)}>
-              <span>{m.title}</span>
-              {m.frequency && <span className={styles.frequency}>{m.frequency}</span>}
-            </button>
-          ))}
-        </section>
-
-        {(goal.obstacle || goal.if_then) && (
-          <section className={styles.woop}>
-            {goal.obstacle && <p><span>🧱 Obstáculo:</span> {goal.obstacle}</p>}
-            {goal.if_then && <p><span>↪️ Se acontecer, eu:</span> {goal.if_then}</p>}
-          </section>
         )}
-
-        <footer className={styles.goalFooter}>
-          <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => openGoal(goal)}>Editar</button>
-          <button className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => deleteGoal(goal)}>Deletar</button>
-        </footer>
       </article>
     );
   };
@@ -268,38 +352,37 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Objetivos de {year}</h2>
-          <p className={styles.hint}>Recomendado: de 3 a 5 ativos. Cada um com resultados-chave (o número) e alavancas (o que você faz toda semana).</p>
         </div>
         <button className="btn btn-primary" onClick={() => openGoal()}>+ Novo objetivo</button>
       </div>
 
       {active.length > MAX_FOCUS && (
         <div className={styles.warning}>
-          ⚠️ {active.length} objetivos ativos. Com mais de {MAX_FOCUS}, a atenção se divide e quase nada avança. Escolha os mais importantes e pause o resto.
+          ⚠️ {active.length} objetivos ativos. Acima de {MAX_FOCUS}, o foco se divide: pause os menos importantes.
         </div>
       )}
 
       {sorted.length === 0 ? (
-        <div className={styles.emptyBig}>
-          Nenhum objetivo ainda. Comece pela aba <strong>Visão</strong> e depois traga para cá os 3 a 5 objetivos que mais aproximam você dela.
-        </div>
+        <div className={styles.emptyBig}>Nenhum objetivo ainda.</div>
       ) : (
         <div className={styles.goalGrid}>{sorted.map(renderGoal)}</div>
       )}
 
-      <Modal isOpen={goalModal.open} onClose={closeGoal} title={goalModal.editing ? 'Editar objetivo' : 'Novo objetivo'}>
+      <Modal isOpen={goalModal.open} onClose={closeGoal} title={isSub ? 'Editar submeta' : goalModal.editing ? 'Editar objetivo' : 'Novo objetivo'}>
         <form onSubmit={saveGoal} className={styles.form}>
           <div className={styles.formGroup}>
-            <label>Objetivo *</label>
+            <label>{isSub ? 'Submeta *' : 'Objetivo *'}</label>
             <input value={goalForm.title} onChange={e => setGoalForm({ ...goalForm, title: e.target.value })} placeholder="Ex: Ter uma operação de IA com 10 clientes recorrentes" required autoFocus />
           </div>
           <div className={styles.formRow}>
+            {!isSub && (
             <div className={styles.formGroup}>
               <label>Área</label>
               <select value={goalForm.area} onChange={e => setGoalForm({ ...goalForm, area: e.target.value as Area })}>
                 {areas.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
               </select>
             </div>
+            )}
             <div className={styles.formGroup}>
               <label>Prazo</label>
               <select value={goalForm.quarter} onChange={e => setGoalForm({ ...goalForm, quarter: e.target.value })}>
@@ -308,6 +391,13 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
               </select>
             </div>
           </div>
+          {!isSub && (
+            <button type="button" className={styles.detailsToggle} onClick={() => setShowMore(v => !v)} aria-expanded={showMore}>
+              {showMore ? '▾' : '▸'} Mais detalhes
+            </button>
+          )}
+          {!isSub && showMore && (
+          <>
           <div className={styles.formGroup}>
             <label>Por que isso importa</label>
             <textarea rows={2} value={goalForm.why} onChange={e => setGoalForm({ ...goalForm, why: e.target.value })} placeholder="O motivo que vai te segurar quando a vontade acabar" />
@@ -320,6 +410,8 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
             <label>↪️ Se esse obstáculo aparecer, eu vou...</label>
             <input value={goalForm.if_then} onChange={e => setGoalForm({ ...goalForm, if_then: e.target.value })} placeholder="Ex: se eu pular a prospecção de manhã, faço 30 min depois do almoço" />
           </div>
+          </>
+          )}
           {goalModal.editing && (
             <div className={styles.formGroup}>
               <label>Status</label>
@@ -328,9 +420,14 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
               </select>
             </div>
           )}
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Salvando...' : goalModal.editing ? 'Atualizar objetivo' : 'Criar objetivo'}
-          </button>
+          <div className={styles.formActions}>
+            {goalModal.editing && (
+              <button type="button" className="btn btn-danger" onClick={() => { const g = goalModal.editing!; closeGoal(); deleteGoal(g); }}>Deletar</button>
+            )}
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={saving}>
+              {saving ? 'Salvando...' : goalModal.editing ? 'Salvar' : 'Criar objetivo'}
+            </button>
+          </div>
         </form>
       </Modal>
 
@@ -340,11 +437,6 @@ export default function ObjetivosTab({ year, goals, measures, onChange }: Props)
         title={`${measureModal.editing ? 'Editar' : 'Novo'} ${isResult ? 'resultado-chave' : 'alavanca'}`}
       >
         <form onSubmit={saveMeasure} className={styles.form}>
-          <p className={styles.hint}>
-            {isResult
-              ? 'Um número que mostra que o objetivo foi atingido. Você não controla direto, mas acompanha.'
-              : 'Uma ação que depende só de você e que, feita com constância, move o resultado.'}
-          </p>
           <div className={styles.formGroup}>
             <label>{isResult ? 'Resultado *' : 'Ação *'}</label>
             <input

@@ -58,6 +58,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
+  font-family: var(--font-mono);
   letter-spacing: 0.1em;
 }
 
@@ -268,6 +269,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
+  font-family: var(--font-mono);
   letter-spacing: 0.08em;
   color: var(--accent-text);
   margin-bottom: 6px;
@@ -397,6 +399,7 @@
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
+  font-family: var(--font-mono);
   letter-spacing: 0.06em;
   margin-top: -6px;
 }

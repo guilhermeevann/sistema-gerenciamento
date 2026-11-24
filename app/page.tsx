@@ -217,7 +217,7 @@ export default function Home() {
           <div>
             <h2 className={styles.sectionTitle}>Palavras da Semana</h2>
           </div>
-          <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '6px 14px' }} onClick={openNewWordModal}>
+          <button className="btn btn-primary btn-sm" onClick={openNewWordModal}>
             + Nova Palavra
           </button>
         </div>

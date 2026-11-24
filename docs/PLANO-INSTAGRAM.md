@@ -1,3 +1,5 @@
+> **HISTÓRICO (24/11/2026).** As telas de planejamento do Instagram saíram deste sistema: a gestão de conteúdo agora mora no CRM da Workflow.ia, em "Esteira de conteúdo" (/conteudo, tabela `cnt_pecas`). Ficaram mantidos as tabelas `ig_ideas`/`ig_inspirations`/`ig_hooks`, os SQLs em `supabase/` e os scripts `scripts/proximos-posts.mjs` e `scripts/importar-conteudo.mjs` (este ainda lê `ig_ideas` para sincronizar a esteira).
+
 # Plano · Seção de Planejamento do Instagram
 
 Criado em 02/10/2026. Rota `/instagram`, item novo na sidebar.

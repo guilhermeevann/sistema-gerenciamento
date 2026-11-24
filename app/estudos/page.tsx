@@ -279,10 +279,10 @@ export default function Estudos() {
                       rows={3}
                     />
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }} disabled={savingSession}>
+                      <button type="submit" className="btn btn-primary btn-sm" style={{ flex: 1 }} disabled={savingSession}>
                         {savingSession ? 'Salvando...' : editingSessionId ? 'Atualizar Sessão' : 'Salvar Sessão'}
                       </button>
-                      <button type="button" className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: '0.85rem' }} onClick={closeSessionForm}>
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={closeSessionForm}>
                         Cancelar
                       </button>
                     </div>

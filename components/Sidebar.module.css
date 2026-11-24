@@ -54,7 +54,7 @@
 }
 
 .logo :global(.h3) {
-  font-size: 1.1rem;
+  font-size: 15px;
 }
 
 .logoIcon {
@@ -83,10 +83,10 @@
   gap: 10px;
   min-height: 40px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 0.93rem;
+  font-size: 13.5px;
   transition: background-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
   overflow: hidden;
@@ -104,8 +104,12 @@
 
 .navItem.active {
   background: var(--accent-soft);
+  color: var(--text-strong);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.navItem.active .navIcon {
   color: var(--accent-text);
-  font-weight: 600;
 }
 
 .navIcon {

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist_Mono, Inter, Sora } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+// Mesma tipografia do CRM da Workflow.ia: Inter no texto, Sora em títulos e botões, Geist Mono em rótulos.
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-inter" });
+const sora = Sora({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-sora" });
+const geistMono = Geist_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   // Cada seção define o próprio título (layout.tsx da pasta); a aba mostra "Seção · Rotina".
   title: { default: "Rotina", template: "%s · Rotina" },
-  description: "Gerenciamento pessoal de rotina, estudos, planejamento do ano e conteúdo.",
+  description: "Gestão pessoal: rotina, estudos, marcos e planejamento do ano.",
 };
 
 import Sidebar from "@/components/Sidebar";
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     // data-theme é corrigido pelo script inline antes da pintura; por isso suppressHydrationWarning.
-    <html lang="pt-BR" className={inter.variable} data-theme="dark" suppressHydrationWarning>
+    <html lang="pt-BR" className={`${inter.variable} ${sora.variable} ${geistMono.variable}`} data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
